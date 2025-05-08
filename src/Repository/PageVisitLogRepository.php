@@ -4,7 +4,6 @@ namespace WechatMiniProgramTrackingBundle\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use DoctrineEnhanceBundle\Repository\CommonRepositoryAware;
 use WechatMiniProgramTrackingBundle\Entity\PageVisitLog;
 
 /**
@@ -15,7 +14,6 @@ use WechatMiniProgramTrackingBundle\Entity\PageVisitLog;
  */
 class PageVisitLogRepository extends ServiceEntityRepository
 {
-    use CommonRepositoryAware;
 
     public function __construct(ManagerRegistry $registry)
     {

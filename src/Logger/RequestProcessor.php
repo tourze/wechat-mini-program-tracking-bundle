@@ -122,6 +122,6 @@ class RequestProcessor implements ProcessorInterface
         }
 
         $this->doctrineService->asyncInsert($log, allowDuplicate: true);
-        $this->cache->set($cacheKey, 1, MINUTE_IN_SECONDS);
+        $this->cache->set($cacheKey, 1, 60);
     }
 }
