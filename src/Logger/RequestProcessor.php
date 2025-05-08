@@ -11,14 +11,13 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Tourze\DoctrineAsyncBundle\Service\DoctrineService;
-use Tourze\Symfony\AopCoroutineBundle\Attribute\AsCoroutine;
 use WechatMiniProgramTrackingBundle\Entity\PageVisitLog;
 
 /**
  * 记录当前接口访问时，前端正在访问的小程序页面路径
  */
 #[AutoconfigureTag('monolog.processor')]
-#[AsCoroutine]
+#[AutoconfigureTag('as-coroutine')]
 class RequestProcessor implements ProcessorInterface
 {
     /**
