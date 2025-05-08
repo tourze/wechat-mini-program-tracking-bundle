@@ -12,7 +12,7 @@ class WechatMiniProgramTrackingBundle extends Bundle implements BundleDependency
     public static function getBundleDependencies(): array
     {
         return [
-
+            \WechatMiniProgramBundle\WechatMiniProgramBundle::class => ['all' => true],
         ];
     }
 }
