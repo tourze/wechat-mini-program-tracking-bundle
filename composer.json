@@ -44,5 +44,10 @@
     "psr-4": {
       "WechatMiniProgramTrackingBundle\\": "src"
     }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "WechatMiniProgramTrackingBundle\\Tests\\": "tests"
+    }
   }
 }
