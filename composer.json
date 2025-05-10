@@ -20,6 +20,7 @@
     "symfony/http-kernel": "^6.4",
     "symfony/security-bundle": "^6.4",
     "symfony/security-core": "^6.4",
+    "symfony/security-http": "^6.4",
     "tourze/bundle-dependency": "0.0.*",
     "tourze/doctrine-async-bundle": "^0.0.6",
     "tourze/doctrine-indexed-bundle": "0.0.*",
