@@ -35,6 +35,7 @@
     "tourze/json-rpc-lock-bundle": "0.1.*",
     "tourze/json-rpc-log-bundle": "0.1.*",
     "tourze/symfony-cron-job-bundle": "0.1.*",
+    "tourze/symfony-schedule-entity-clean-bundle": "0.1.*",
     "tourze/wechat-mini-program-bundle": "0.1.*",
     "yiisoft/arrays": "^3",
     "yiisoft/json": "^1.0"
