@@ -23,7 +23,7 @@ class RefinePageLogInfoCommand extends Command
         parent::__construct();
     }
 
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         $log = $this->pageVisitLogRepository->createQueryBuilder('p')
             ->where("p.createTime between :start and :end and (p.createdBy is null or p.createdBy = '')")
