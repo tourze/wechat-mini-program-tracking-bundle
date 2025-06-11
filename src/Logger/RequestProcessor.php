@@ -10,7 +10,7 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Tourze\DoctrineAsyncBundle\Service\DoctrineService;
+use Tourze\DoctrineAsyncInsertBundle\Service\AsyncInsertService;
 use WechatMiniProgramTrackingBundle\Entity\PageVisitLog;
 
 /**
@@ -36,7 +36,7 @@ class RequestProcessor implements ProcessorInterface
     private ?string $routeId = null;
 
     public function __construct(
-        private readonly DoctrineService $doctrineService,
+        private readonly AsyncInsertService $doctrineService,
         private readonly CacheInterface $cache,
         private readonly TokenStorageInterface $tokenStorage,
     ) {

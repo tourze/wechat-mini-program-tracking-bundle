@@ -12,12 +12,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Tourze\DoctrineAsyncBundle\Service\DoctrineService;
+use Tourze\DoctrineAsyncInsertBundle\Service\AsyncInsertService;
 use WechatMiniProgramTrackingBundle\Logger\RequestProcessor;
 
 class RequestProcessorTest extends TestCase
 {
-    private DoctrineService $doctrineService;
+    private AsyncInsertService $doctrineService;
     private CacheInterface $cache;
     private TokenStorageInterface $tokenStorage;
     private RequestProcessor $processor;
@@ -25,7 +25,7 @@ class RequestProcessorTest extends TestCase
     protected function setUp(): void
     {
         // 创建模拟对象
-        $this->doctrineService = $this->createMock(DoctrineService::class);
+        $this->doctrineService = $this->createMock(AsyncInsertService::class);
         $this->cache = $this->createMock(CacheInterface::class);
         $this->tokenStorage = $this->createMock(TokenStorageInterface::class);
 
