@@ -4,27 +4,21 @@ namespace WechatMiniProgramTrackingBundle\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Stringable;
 use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
-use Tourze\DoctrineTimestampBundle\Attribute\CreateTimeColumn;
 use Tourze\DoctrineUserAgentBundle\Attribute\CreateUserAgentColumn;
 use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
 use Tourze\EasyAdmin\Attribute\Action\Exportable;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
-use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 use Tourze\ScheduleEntityCleanBundle\Attribute\AsScheduleClean;
 use WechatMiniProgramTrackingBundle\Repository\JumpTrackingLogRepository;
 
 #[AsScheduleClean(expression: '23 4 * * *', defaultKeepDay: 30, keepDayEnv: 'JUMP_TRACKING_LOG_PERSIST_DAY_NUM')]
 #[Exportable]
-#[AsPermission(title: '跳转tracking日志')]
 #[ORM\Entity(repositoryClass: JumpTrackingLogRepository::class)]
 #[ORM\Table(name: 'wechat_mini_program_jump_tracking_log', options: ['comment' => '跳转tracking日志'])]
 #[ORM\Index(columns: ['page'], name: 'idx_page')]
-class JumpTrackingLog
+class JumpTrackingLog implements Stringable
 {
-    #[ListColumn(order: -1)]
-    #[ExportColumn]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
@@ -35,22 +29,16 @@ class JumpTrackingLog
         return $this->id;
     }
 
-    #[ListColumn]
-    #[ORM\Column(length: 255, options: ['comment' => '页面路径'])]
     private string $page;
 
-    #[ListColumn]
-    #[ORM\Column(length: 64, unique: true, nullable: true, options: ['comment' => 'open_id'])]
     private ?string $openId = null;
 
-    #[ListColumn]
-    #[ORM\Column(length: 64, unique: true, nullable: true, options: ['comment' => 'union_id'])]
     private ?string $unionId = null;
 
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['comment' => '参数'])]
     private ?array $query = null;
 
-    #[ORM\Column(length: 100, nullable: true)]
+#[ORM\Column(length: 100, nullable: true, options: ['comment' => '字段说明'])]
     private ?string $appKey = null;
 
     // 添加 businessChannel 变量
@@ -149,18 +137,13 @@ class JumpTrackingLog
     private ?bool $jumpResult = null;
 
     #[CreateUserAgentColumn]
-    #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '创建时UA'])]
     private ?string $createdFromUa = null;
 
     #[IndexColumn]
-    #[ListColumn(order: 98, sorter: true)]
-    #[ExportColumn]
-    #[CreateTimeColumn]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '创建时间'])]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true, options: ['comment' => '创建时间'])]
     private ?\DateTimeInterface $createTime = null;
 
     #[CreatedByColumn]
-    #[ORM\Column(nullable: true, options: ['comment' => '创建人'])]
     private ?string $createdBy = null;
 
     public function getPage(): string
@@ -585,5 +568,10 @@ class JumpTrackingLog
     public function setCreatedBy(?string $createdBy): void
     {
         $this->createdBy = $createdBy;
+    }
+
+    public function __toString(): string
+    {
+        return (string) $this->id;
     }
 }

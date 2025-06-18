@@ -50,7 +50,7 @@ class PageVisitLogTest extends TestCase
     public function testCreateTimeGetterAndSetter(): void
     {
         $entity = new PageVisitLog();
-        $dateTime = new \DateTime();
+        $dateTime = new \DateTimeImmutable();
 
         $entity->setCreateTime($dateTime);
         $this->assertSame($dateTime, $entity->getCreateTime());
@@ -68,7 +68,7 @@ class PageVisitLogTest extends TestCase
         $this->assertInstanceOf(PageVisitLog::class, $entity->setSessionId('test-session-id'));
         $this->assertInstanceOf(PageVisitLog::class, $entity->setQuery(['param' => 'value']));
         $this->assertInstanceOf(PageVisitLog::class, $entity->setCreatedFromUa('test-user-agent'));
-        $this->assertInstanceOf(PageVisitLog::class, $entity->setCreateTime(new \DateTime()));
+        $this->assertInstanceOf(PageVisitLog::class, $entity->setCreateTime(new \DateTimeImmutable()));
     }
 
     /**

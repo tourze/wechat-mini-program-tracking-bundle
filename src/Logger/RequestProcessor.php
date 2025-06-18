@@ -109,14 +109,14 @@ class RequestProcessor implements ProcessorInterface
         $page = explode('?', $this->currentPage, 2);
         $log->setPage($page[0]);
         $query = [];
-        if (isset($page[1])) {
+        if ((bool) isset($page[1])) {
             parse_str($page[1], $query);
         }
         $log->setQuery($query ?: (object) []);
         $log->setSessionId($this->sessionId);
         $log->setRouteId($this->routeId);
         $token = $this->tokenStorage->getToken();
-        if ($token) {
+        if ((bool) $token) {
             $log->setCreatedBy($token->getUserIdentifier());
         }
 

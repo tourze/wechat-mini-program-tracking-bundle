@@ -4,31 +4,24 @@ namespace WechatMiniProgramTrackingBundle\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Stringable;
 use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
 use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
 use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineUserAgentBundle\Attribute\CreateUserAgentColumn;
 use Tourze\DoctrineUserAgentBundle\Attribute\UpdateUserAgentColumn;
-use Tourze\EasyAdmin\Attribute\Action\Deletable;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
-use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 use WechatMiniProgramBundle\Entity\Account;
 use WechatMiniProgramBundle\Entity\LaunchOptionsAware;
 use WechatMiniProgramTrackingBundle\Repository\PageNotFoundLogRepository;
 
-#[AsPermission(title: '404页面日志')]
-#[Deletable]
 #[ORM\Entity(repositoryClass: PageNotFoundLogRepository::class)]
 #[ORM\Table(name: 'wechat_mini_program_page_not_found_log', options: ['comment' => '404页面日志'])]
-class PageNotFoundLog
+class PageNotFoundLog implements Stringable
 {
     use TimestampableAware;
     use LaunchOptionsAware;
 
-    #[ExportColumn]
-    #[ListColumn(order: -1, sorter: true)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(SnowflakeIdGenerator::class)]
@@ -36,14 +29,11 @@ class PageNotFoundLog
     private ?string $id = null;
 
     #[CreateUserAgentColumn]
-    #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '创建时UA'])]
     private ?string $createdFromUa = null;
 
     #[UpdateUserAgentColumn]
-    #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '更新时UA'])]
     private ?string $updatedFromUa = null;
 
-    #[ListColumn(title: '账号')]
     #[ORM\ManyToOne(targetEntity: Account::class)]
     #[ORM\JoinColumn(onDelete: 'SET NULL')]
     private ?Account $account = null;
@@ -60,18 +50,16 @@ class PageNotFoundLog
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '原始错误'])]
     private ?string $rawError = null;
 
-    #[ORM\Column(type: Types::STRING, length: 100, nullable: true)]
+#[ORM\Column(type: Types::STRING, length: 100, nullable: true, options: ['comment' => '字段说明'])]
     private ?string $openId = null;
 
-    #[ORM\Column(type: Types::STRING, length: 100, nullable: true)]
+#[ORM\Column(type: Types::STRING, length: 100, nullable: true, options: ['comment' => '字段说明'])]
     private ?string $unionId = null;
 
     #[CreateIpColumn]
-    #[ORM\Column(type: Types::STRING, length: 128, nullable: true, options: ['comment' => '创建者IP'])]
     private ?string $createdFromIp = null;
 
     #[UpdateIpColumn]
-    #[ORM\Column(type: Types::STRING, length: 128, nullable: true, options: ['comment' => '更新者IP'])]
     private ?string $updatedFromIp = null;
 
     public function getId(): ?string
@@ -205,5 +193,10 @@ class PageNotFoundLog
         $this->updatedFromIp = $updatedFromIp;
 
         return $this;
+    }
+
+    public function __toString(): string
+    {
+        return (string) $this->id;
     }
 }

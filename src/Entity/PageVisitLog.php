@@ -4,29 +4,22 @@ namespace WechatMiniProgramTrackingBundle\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Stringable;
 use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
-use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
-use Tourze\DoctrineTimestampBundle\Attribute\CreateTimeColumn;
 use Tourze\DoctrineUserAgentBundle\Attribute\CreateUserAgentColumn;
 use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
 use Tourze\EasyAdmin\Attribute\Action\Exportable;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
-use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 use Tourze\ScheduleEntityCleanBundle\Attribute\AsScheduleClean;
 use WechatMiniProgramTrackingBundle\Repository\PageVisitLogRepository;
 
 #[AsScheduleClean(expression: '30 2 * * *', defaultKeepDay: 3, keepDayEnv: 'PAGE_VISIT_LOG_PERSIST_DAY_NUM')]
-#[AsPermission(title: '页面请求日志')]
 #[Exportable]
 #[ORM\Entity(repositoryClass: PageVisitLogRepository::class)]
 #[ORM\Table(name: 'json_rpc_page_log', options: ['comment' => '页面请求日志'])]
 #[ORM\Index(columns: ['page'], name: 'idx_page')]
 #[ORM\UniqueConstraint(name: 'json_rpc_page_log_idx_uniq', columns: ['session_id', 'route_id'])]
-class PageVisitLog
+class PageVisitLog implements Stringable
 {
-    #[ListColumn(order: -1)]
-    #[ExportColumn]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
@@ -37,39 +30,26 @@ class PageVisitLog
         return $this->id;
     }
 
-    #[ListColumn]
-    #[ORM\Column(length: 100, options: ['comment' => '页面路径'])]
     private string $page;
 
-    #[ListColumn]
-    #[ORM\Column(length: 64, options: ['comment' => '页面路由ID'])]
     private ?int $routeId;
 
-    #[ListColumn]
-    #[ORM\Column(length: 64, options: ['comment' => '会话ID'])]
     private string $sessionId;
 
     #[ORM\Column(type: Types::JSON, length: 255, nullable: true, options: ['comment' => '参数'])]
     private ?array $query = null;
 
     #[CreateUserAgentColumn]
-    #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '创建时UA'])]
     private ?string $createdFromUa = null;
 
     #[IndexColumn]
-    #[ListColumn(order: 98, sorter: true)]
-    #[ExportColumn]
-    #[CreateTimeColumn]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '创建时间'])]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true, options: ['comment' => '创建时间'])]
     private ?\DateTimeInterface $createTime = null;
 
-    #[ListColumn(order: 99)]
-    #[CreateIpColumn]
     #[ORM\Column(length: 45, nullable: true, options: ['comment' => '创建时IP'])]
     private ?string $createdFromIp = null;
 
     #[CreatedByColumn]
-    #[ORM\Column(nullable: true, options: ['comment' => '创建人'])]
     private ?string $createdBy = null;
 
     public function setCreatedBy(?string $createdBy): void
@@ -162,5 +142,10 @@ class PageVisitLog
     public function setCreatedFromIp(?string $createdFromIp): void
     {
         $this->createdFromIp = $createdFromIp;
+    }
+
+    public function __toString(): string
+    {
+        return (string) $this->id;
     }
 }

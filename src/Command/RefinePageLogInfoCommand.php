@@ -15,7 +15,9 @@ use WechatMiniProgramTrackingBundle\Repository\PageVisitLogRepository;
 #[AsCommand(name: 'wechat-mini-program:refine-page-log-info', description: '定期修正页面访问日志的创建人信息')]
 class RefinePageLogInfoCommand extends Command
 {
-    public function __construct(
+    
+    public const NAME = 'wechat-mini-program:refine-page-log-info';
+public function __construct(
         private readonly PageVisitLogRepository $pageVisitLogRepository,
         private readonly EntityManagerInterface $entityManager,
     )
@@ -40,7 +42,7 @@ class RefinePageLogInfoCommand extends Command
                 ->setMaxResults(1)
                 ->getQuery()
                 ->getOneOrNullResult();
-            if (empty($res)) {
+            if ((bool) empty($res)) {
                 continue;
             }
 
