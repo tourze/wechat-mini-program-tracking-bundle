@@ -94,7 +94,7 @@ class RequestProcessor implements ProcessorInterface
 
     private function saveLog(): void
     {
-        if (!$this->currentPage || !$this->sessionId || !$this->routeId) {
+        if (null === $this->currentPage || null === $this->sessionId || null === $this->routeId) {
             return;
         }
 
@@ -116,7 +116,7 @@ class RequestProcessor implements ProcessorInterface
         $log->setSessionId($this->sessionId);
         $log->setRouteId($this->routeId);
         $token = $this->tokenStorage->getToken();
-        if ((bool) $token) {
+        if (null !== $token) {
             $log->setCreatedBy($token->getUserIdentifier());
         }
 
