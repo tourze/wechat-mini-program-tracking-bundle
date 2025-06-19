@@ -7,18 +7,17 @@ use Doctrine\ORM\Mapping as ORM;
 use Stringable;
 use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
 use Tourze\DoctrineUserAgentBundle\Attribute\CreateUserAgentColumn;
-use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
-use Tourze\EasyAdmin\Attribute\Action\Exportable;
+use Tourze\DoctrineUserBundle\Traits\CreatedByAware;
 use Tourze\ScheduleEntityCleanBundle\Attribute\AsScheduleClean;
 use WechatMiniProgramTrackingBundle\Repository\JumpTrackingLogRepository;
 
 #[AsScheduleClean(expression: '23 4 * * *', defaultKeepDay: 30, keepDayEnv: 'JUMP_TRACKING_LOG_PERSIST_DAY_NUM')]
-#[Exportable]
 #[ORM\Entity(repositoryClass: JumpTrackingLogRepository::class)]
 #[ORM\Table(name: 'wechat_mini_program_jump_tracking_log', options: ['comment' => '跳转tracking日志'])]
 #[ORM\Index(columns: ['page'], name: 'idx_page')]
 class JumpTrackingLog implements Stringable
 {
+    use CreatedByAware;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
@@ -133,7 +132,7 @@ class JumpTrackingLog implements Stringable
     #[ORM\Column(length: 255, nullable: true, options: ['comment' => '会话ID'])]
     private ?string $sessionId = null;
 
-    #[ORM\Column]
+    #[ORM\Column(options: ['comment' => '跳转结果'])]
     private ?bool $jumpResult = null;
 
     #[CreateUserAgentColumn]
@@ -141,10 +140,7 @@ class JumpTrackingLog implements Stringable
 
     #[IndexColumn]
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true, options: ['comment' => '创建时间'])]
-    private ?\DateTimeInterface $createTime = null;
-
-    #[CreatedByColumn]
-    private ?string $createdBy = null;
+    private ?\DateTimeImmutable $createTime = null;
 
     public function getPage(): string
     {
@@ -550,24 +546,14 @@ class JumpTrackingLog implements Stringable
         $this->createdFromUa = $createdFromUa;
     }
 
-    public function getCreateTime(): ?\DateTimeInterface
+    public function getCreateTime(): ?\DateTimeImmutableImmutable
     {
         return $this->createTime;
     }
 
-    public function setCreateTime(?\DateTimeInterface $createTime): void
+    public function setCreateTime(?\DateTimeImmutable $createTime): void
     {
         $this->createTime = $createTime;
-    }
-
-    public function getCreatedBy(): ?string
-    {
-        return $this->createdBy;
-    }
-
-    public function setCreatedBy(?string $createdBy): void
-    {
-        $this->createdBy = $createdBy;
     }
 
     public function __toString(): string

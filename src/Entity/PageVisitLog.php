@@ -7,19 +7,18 @@ use Doctrine\ORM\Mapping as ORM;
 use Stringable;
 use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
 use Tourze\DoctrineUserAgentBundle\Attribute\CreateUserAgentColumn;
-use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
-use Tourze\EasyAdmin\Attribute\Action\Exportable;
+use Tourze\DoctrineUserBundle\Traits\CreatedByAware;
 use Tourze\ScheduleEntityCleanBundle\Attribute\AsScheduleClean;
 use WechatMiniProgramTrackingBundle\Repository\PageVisitLogRepository;
 
 #[AsScheduleClean(expression: '30 2 * * *', defaultKeepDay: 3, keepDayEnv: 'PAGE_VISIT_LOG_PERSIST_DAY_NUM')]
-#[Exportable]
 #[ORM\Entity(repositoryClass: PageVisitLogRepository::class)]
 #[ORM\Table(name: 'json_rpc_page_log', options: ['comment' => '页面请求日志'])]
 #[ORM\Index(columns: ['page'], name: 'idx_page')]
 #[ORM\UniqueConstraint(name: 'json_rpc_page_log_idx_uniq', columns: ['session_id', 'route_id'])]
 class PageVisitLog implements Stringable
 {
+    use CreatedByAware;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
@@ -32,7 +31,7 @@ class PageVisitLog implements Stringable
 
     private string $page;
 
-    private ?int $routeId;
+    private int $routeId;
 
     private string $sessionId;
 
@@ -44,23 +43,10 @@ class PageVisitLog implements Stringable
 
     #[IndexColumn]
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true, options: ['comment' => '创建时间'])]
-    private ?\DateTimeInterface $createTime = null;
+    private ?\DateTimeImmutable $createTime = null;
 
     #[ORM\Column(length: 45, nullable: true, options: ['comment' => '创建时IP'])]
     private ?string $createdFromIp = null;
-
-    #[CreatedByColumn]
-    private ?string $createdBy = null;
-
-    public function setCreatedBy(?string $createdBy): void
-    {
-        $this->createdBy = $createdBy;
-    }
-
-    public function getCreatedBy(): ?string
-    {
-        return $this->createdBy;
-    }
 
     public function getPage(): string
     {
@@ -122,14 +108,14 @@ class PageVisitLog implements Stringable
         return $this;
     }
 
-    public function setCreateTime(?\DateTimeInterface $createdAt): self
+    public function setCreateTime(?\DateTimeImmutable $createdAt): self
     {
         $this->createTime = $createdAt;
 
         return $this;
     }
 
-    public function getCreateTime(): ?\DateTimeInterface
+    public function getCreateTime(): ?\DateTimeImmutableImmutable
     {
         return $this->createTime;
     }
