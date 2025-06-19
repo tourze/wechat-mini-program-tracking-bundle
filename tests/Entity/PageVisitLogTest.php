@@ -81,8 +81,9 @@ class PageVisitLogTest extends TestCase
         // 确认有 getId 方法
         $this->assertIsInt($entity->getId()); // 初始值可能为 0 而不是 null
 
-        // 验证没有 setId 方法
-        $this->assertFalse(method_exists($entity, 'setId'));
+        // 使用反射API检查setId方法不存在
+        $reflection = new \ReflectionClass($entity);
+        $this->assertFalse($reflection->hasMethod('setId'));
     }
 
     /**

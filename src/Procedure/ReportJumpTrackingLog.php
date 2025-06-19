@@ -128,8 +128,14 @@ class ReportJumpTrackingLog extends BaseProcedure
         $jumpTrackingLog->setSdkType($this->sdkType);
         $jumpTrackingLog->setSdkVersion($this->sdkVersion);
         $jumpTrackingLog->setSessionId($this->sessionId);
-        $jumpTrackingLog->setOpenId($this->security->getUser()->getUserIdentifier());
-        $jumpTrackingLog->setUnionId($this->security->getUser()->getIdentity());
+        $user = $this->security->getUser();
+        if (null !== $user) {
+            $jumpTrackingLog->setOpenId($user->getUserIdentifier());
+            // TODO: getIdentity() 方法需要在用户实体中实现
+            if (method_exists($user, 'getIdentity')) {
+                $jumpTrackingLog->setUnionId($user->getIdentity());
+            }
+        }
 
         $this->doctrineService->asyncInsert($jumpTrackingLog);
 

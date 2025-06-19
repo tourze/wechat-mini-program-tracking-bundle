@@ -114,7 +114,7 @@ class RequestProcessor implements ProcessorInterface
         }
         $log->setQuery($query ?: (object) []);
         $log->setSessionId($this->sessionId);
-        $log->setRouteId($this->routeId);
+        $log->setRouteId((int) $this->routeId);
         $token = $this->tokenStorage->getToken();
         if (null !== $token) {
             $log->setCreatedBy($token->getUserIdentifier());

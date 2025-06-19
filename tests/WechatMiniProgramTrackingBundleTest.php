@@ -15,8 +15,6 @@ class WechatMiniProgramTrackingBundleTest extends TestCase
     {
         $dependencies = WechatMiniProgramTrackingBundle::getBundleDependencies();
 
-        $this->assertIsArray($dependencies);
-
         // 检查依赖中是否包含 WechatMiniProgramBundle
         $this->assertArrayHasKey(WechatMiniProgramBundle::class, $dependencies);
 

@@ -7,7 +7,7 @@ use Monolog\LogRecord;
 use PHPUnit\Framework\TestCase;
 use Psr\SimpleCache\CacheInterface;
 use Symfony\Component\HttpFoundation\HeaderBag;
-use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -60,7 +60,7 @@ class RequestProcessorTest extends TestCase
         // 模拟请求事件
         $request = new Request();
         $request->headers = new HeaderBag(['Current-Page' => '/pages/index/index']);
-        $request->query = new ParameterBag([
+        $request->query = new InputBag([
             '__sessionId' => 'test-session',
             '__routeId' => '123'
         ]);
@@ -121,7 +121,7 @@ class RequestProcessorTest extends TestCase
         // 模拟请求事件
         $request = new Request();
         $request->headers = new HeaderBag(['Current-Page' => '/pages/index/index?param=value']);
-        $request->query = new ParameterBag([
+        $request->query = new InputBag([
             '__sessionId' => 'test-session',
             '__routeId' => '123'
         ]);
@@ -172,7 +172,7 @@ class RequestProcessorTest extends TestCase
         // 模拟请求事件，但没有设置 sessionId
         $request = new Request();
         $request->headers = new HeaderBag(['Current-Page' => '/pages/index/index']);
-        $request->query = new ParameterBag([
+        $request->query = new InputBag([
             '__routeId' => '123'
         ]);
 
@@ -214,7 +214,7 @@ class RequestProcessorTest extends TestCase
         // 模拟请求事件
         $request = new Request();
         $request->headers = new HeaderBag(['Current-Page' => '/pages/index/index']);
-        $request->query = new ParameterBag([
+        $request->query = new InputBag([
             '__sessionId' => 'test-session',
             '__routeId' => '123'
         ]);

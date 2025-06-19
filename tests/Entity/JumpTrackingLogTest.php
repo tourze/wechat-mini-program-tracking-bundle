@@ -18,21 +18,17 @@ class JumpTrackingLogTest extends TestCase
         // 测试 ID 属性
         $this->assertIsInt($entity->getId()); // 初始值可能为 0 而不是 null
 
-        // 测试其他可能存在的属性（基于类名和一般实体模式）
-        if (method_exists($entity, 'setPage')) {
-            $entity->setPage('/pages/index/index');
-            $this->assertSame('/pages/index/index', $entity->getPage());
-        }
+        // 测试 Page 属性
+        $entity->setPage('/pages/index/index');
+        $this->assertSame('/pages/index/index', $entity->getPage());
 
-        if (method_exists($entity, 'setSessionId')) {
-            $entity->setSessionId('test-session-id');
-            $this->assertSame('test-session-id', $entity->getSessionId());
-        }
+        // 测试 SessionId 属性
+        $entity->setSessionId('test-session-id');
+        $this->assertSame('test-session-id', $entity->getSessionId());
 
-        if (method_exists($entity, 'setCreatedBy')) {
-            $entity->setCreatedBy('test-user');
-            $this->assertSame('test-user', $entity->getCreatedBy());
-        }
+        // 测试 CreatedBy 属性
+        $entity->setCreatedBy('test-user');
+        $this->assertSame('test-user', $entity->getCreatedBy());
     }
 
     /**
@@ -42,7 +38,8 @@ class JumpTrackingLogTest extends TestCase
     {
         $entity = new JumpTrackingLog();
 
-        // 验证没有 setId 方法
-        $this->assertFalse(method_exists($entity, 'setId'));
+        // 使用反射API检查setId方法不存在
+        $reflection = new \ReflectionClass($entity);
+        $this->assertFalse($reflection->hasMethod('setId'));
     }
 }

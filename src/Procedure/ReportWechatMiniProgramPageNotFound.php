@@ -11,7 +11,6 @@ use Tourze\JsonRPCLockBundle\Procedure\LockableProcedure;
 use Tourze\JsonRPCLogBundle\Attribute\Log;
 use WechatMiniProgramBundle\Procedure\LaunchOptionsAware;
 use WechatMiniProgramTrackingBundle\Entity\PageNotFoundLog;
-use WechatMiniProgramTrackingBundle\Repository\PageNotFoundLogRepository;
 use Yiisoft\Arrays\ArrayHelper;
 use Yiisoft\Json\Json;
 
@@ -27,7 +26,6 @@ class ReportWechatMiniProgramPageNotFound extends LockableProcedure
     public array $error;
 
     public function __construct(
-        private readonly PageNotFoundLogRepository $logRepository,
         private readonly EntityManagerInterface $entityManager,
     ) {
     }

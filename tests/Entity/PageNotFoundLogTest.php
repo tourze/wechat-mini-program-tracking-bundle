@@ -14,25 +14,33 @@ class PageNotFoundLogTest extends TestCase
     {
         $entity = new PageNotFoundLog();
 
-        // 由于我们没有查看完整的 PageNotFoundLog 类，这里假设它有与 PageVisitLog 类似的属性
         // 测试 ID 属性
         $this->assertNull($entity->getId());
 
-        // 测试其他可能存在的属性（基于类名和一般实体模式）
-        if (method_exists($entity, 'setPage')) {
-            $entity->setPage('/pages/not-found');
-            $this->assertSame('/pages/not-found', $entity->getPage());
-        }
+        // 测试 Path 属性
+        $entity->setPath('/pages/not-found');
+        $this->assertSame('/pages/not-found', $entity->getPath());
 
-        if (method_exists($entity, 'setSessionId')) {
-            $entity->setSessionId('test-session-id');
-            $this->assertSame('test-session-id', $entity->getSessionId());
-        }
+        // 测试 OpenType 属性
+        $entity->setOpenType('navigate');
+        $this->assertSame('navigate', $entity->getOpenType());
 
-        if (method_exists($entity, 'setCreatedBy')) {
-            $entity->setCreatedBy('test-user');
-            $this->assertSame('test-user', $entity->getCreatedBy());
-        }
+        // 测试 Query 属性
+        $query = ['param1' => 'value1'];
+        $entity->setQuery($query);
+        $this->assertSame($query, $entity->getQuery());
+
+        // 测试 RawError 属性
+        $entity->setRawError('Page not found error');
+        $this->assertSame('Page not found error', $entity->getRawError());
+
+        // 测试 OpenId 属性
+        $entity->setOpenId('test-openid');
+        $this->assertSame('test-openid', $entity->getOpenId());
+
+        // 测试 UnionId 属性
+        $entity->setUnionId('test-unionid');
+        $this->assertSame('test-unionid', $entity->getUnionId());
     }
 
     /**
@@ -42,7 +50,8 @@ class PageNotFoundLogTest extends TestCase
     {
         $entity = new PageNotFoundLog();
 
-        // 验证没有 setId 方法
-        $this->assertFalse(method_exists($entity, 'setId'));
+        // 使用反射API检查setId方法不存在
+        $reflection = new \ReflectionClass($entity);
+        $this->assertFalse($reflection->hasMethod('setId'));
     }
 }
