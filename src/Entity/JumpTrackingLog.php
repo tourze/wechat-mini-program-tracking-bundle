@@ -546,7 +546,7 @@ class JumpTrackingLog implements Stringable
         $this->createdFromUa = $createdFromUa;
     }
 
-    public function getCreateTime(): ?\DateTimeImmutableImmutable
+    public function getCreateTime(): ?\DateTimeImmutable
     {
         return $this->createTime;
     }

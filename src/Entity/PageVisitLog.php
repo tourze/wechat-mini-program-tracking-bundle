@@ -115,7 +115,7 @@ class PageVisitLog implements Stringable
         return $this;
     }
 
-    public function getCreateTime(): ?\DateTimeImmutableImmutable
+    public function getCreateTime(): ?\DateTimeImmutable
     {
         return $this->createTime;
     }
