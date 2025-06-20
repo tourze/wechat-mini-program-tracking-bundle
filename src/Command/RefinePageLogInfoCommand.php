@@ -2,7 +2,7 @@
 
 namespace WechatMiniProgramTrackingBundle\Command;
 
-use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -29,8 +29,8 @@ public function __construct(
     {
         $log = $this->pageVisitLogRepository->createQueryBuilder('p')
             ->where("p.createTime between :start and :end and (p.createdBy is null or p.createdBy = '')")
-            ->setParameter('start', Carbon::now()->startOfDay())
-            ->setParameter('end', Carbon::now()->endOfDay())
+            ->setParameter('start', CarbonImmutable::now()->startOfDay())
+            ->setParameter('end', CarbonImmutable::now()->endOfDay())
             ->getQuery()
             ->toIterable();
 
