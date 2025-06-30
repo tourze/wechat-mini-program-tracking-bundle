@@ -5,7 +5,7 @@ namespace WechatMiniProgramTrackingBundle\Procedure;
 use Tourze\JsonRPC\Core\Attribute\MethodExpose;
 use Tourze\JsonRPCLockBundle\Procedure\LockableProcedure;
 
-#[MethodExpose('apiReportWeappVisitPage')]
+#[MethodExpose(method: 'apiReportWeappVisitPage')]
 class ApiReportWeappVisitPage extends LockableProcedure
 {
     /**

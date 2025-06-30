@@ -14,15 +14,15 @@ use WechatMiniProgramTrackingBundle\Entity\PageNotFoundLog;
 use Yiisoft\Arrays\ArrayHelper;
 use Yiisoft\Json\Json;
 
-#[MethodTag('微信小程序')]
-#[MethodDoc('上报不存在的页面')]
-#[MethodExpose('ReportWechatMiniProgramPageNotFound')]
+#[MethodTag(name: '微信小程序')]
+#[MethodDoc(summary: '上报不存在的页面')]
+#[MethodExpose(method: 'ReportWechatMiniProgramPageNotFound')]
 #[Log]
 class ReportWechatMiniProgramPageNotFound extends LockableProcedure
 {
     use LaunchOptionsAware;
 
-    #[MethodParam('错误信息')]
+    #[MethodParam(description: '错误信息')]
     public array $error;
 
     public function __construct(
@@ -37,7 +37,7 @@ class ReportWechatMiniProgramPageNotFound extends LockableProcedure
         $log->setAccount(null);
         $log->setPath($this->error['path']);
         $log->setOpenType($this->error['openType'] ?? '');
-        $log->setQuery($this->error['query'] ?? null);
+        $log->setQuery($this->error['query'] ?? []);
         $log->setRawError(Json::encode($this->error));
         $log->setLaunchOptions($this->launchOptions);
         $log->setEnterOptions($this->enterOptions);

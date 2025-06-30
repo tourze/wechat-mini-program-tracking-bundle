@@ -16,10 +16,10 @@ use WechatMiniProgramTrackingBundle\Entity\JumpTrackingLog;
 /**
  * 上报跳转tracking日志
  */
-#[MethodTag('微信小程序')]
-#[MethodDoc('上报跳转tracking日志')]
-#[MethodExpose('ReportJumpTrackingLog')]
-#[IsGranted('IS_AUTHENTICATED_FULLY')]
+#[MethodTag(name: '微信小程序')]
+#[MethodDoc(summary: '上报跳转tracking日志')]
+#[MethodExpose(method: 'ReportJumpTrackingLog')]
+#[IsGranted(attribute: 'IS_AUTHENTICATED_FULLY')]
 #[Log]
 class ReportJumpTrackingLog extends BaseProcedure
 {
@@ -29,82 +29,84 @@ class ReportJumpTrackingLog extends BaseProcedure
     ) {
     }
 
-    #[MethodParam('当前路径')]
+    #[MethodParam(description: '当前路径')]
     public ?string $currentPath = null;
 
-    #[MethodParam('跳转结果')]
+    #[MethodParam(description: '跳转结果')]
     public ?bool $jumpResult = false;
 
-    #[MethodParam('设备品牌')]
+    #[MethodParam(description: '设备品牌')]
     public ?string $deviceBrand = null;
 
-    #[MethodParam('设备ID')]
+    #[MethodParam(description: '设备ID')]
     public ?string $deviceId = null;
 
-    #[MethodParam('设备型号')]
+    #[MethodParam(description: '设备型号')]
     public ?string $deviceModel = null;
 
-    #[MethodParam('设备屏幕高度')]
+    #[MethodParam(description: '设备屏幕高度')]
     public ?int $deviceScreenHeight = null;
 
-    #[MethodParam('设备屏幕宽度')]
+    #[MethodParam(description: '设备屏幕宽度')]
     public ?int $deviceScreenWidth = null;
 
-    #[MethodParam('设备系统')]
+    #[MethodParam(description: '设备系统')]
     public ?string $deviceSystem = null;
 
-    #[MethodParam('设备系统版本')]
+    #[MethodParam(description: '设备系统版本')]
     public ?string $deviceSystemVersion = null;
 
-    #[MethodParam('事件名称')]
+    #[MethodParam(description: '事件名称')]
     public ?string $eventName = null;
 
-    #[MethodParam('事件参数')]
+    #[MethodParam(description: '事件参数')]
     public ?array $eventParam = null;
 
-    #[MethodParam('网络类型')]
+    #[MethodParam(description: '网络类型')]
     public ?string $networkType = null;
 
-    #[MethodParam('页面名称')]
+    #[MethodParam(description: '页面名称')]
     public ?string $pageName = null;
 
-    #[MethodParam('页面查询参数')]
+    #[MethodParam(description: '页面查询参数')]
     public ?string $pageQuery = null;
 
-    #[MethodParam('页面标题')]
+    #[MethodParam(description: '页面标题')]
     public ?string $pageTitle = null;
 
-    #[MethodParam('页面URL')]
+    #[MethodParam(description: '页面URL')]
     public ?string $pageUrl = null;
 
-    #[MethodParam('平台')]
+    #[MethodParam(description: '平台')]
     public ?string $platform = null;
 
-    #[MethodParam('前一个路径')]
+    #[MethodParam(description: '前一个路径')]
     public ?string $prevPath = null;
 
-    #[MethodParam('前一个会话ID')]
+    #[MethodParam(description: '前一个会话ID')]
     public ?string $prevSessionId = null;
 
-    #[MethodParam('场景')]
+    #[MethodParam(description: '场景')]
     public ?string $scene = null;
 
-    #[MethodParam('SDK名称')]
+    #[MethodParam(description: 'SDK名称')]
     public ?string $sdkName = null;
 
-    #[MethodParam('SDK类型')]
+    #[MethodParam(description: 'SDK类型')]
     public ?string $sdkType = null;
 
-    #[MethodParam('SDK版本')]
+    #[MethodParam(description: 'SDK版本')]
     public ?string $sdkVersion = null;
 
-    #[MethodParam('会话ID')]
+    #[MethodParam(description: '会话ID')]
     public ?string $sessionId = null;
 
     public function execute(): array
     {
         $jumpTrackingLog = new JumpTrackingLog();
-        $jumpTrackingLog->setPage($this->currentPath);
+        if (null !== $this->currentPath) {
+            $jumpTrackingLog->setPage($this->currentPath);
+        }
         $jumpTrackingLog->setJumpResult($this->jumpResult);
         $jumpTrackingLog->setDeviceBrand($this->deviceBrand);
         $jumpTrackingLog->setDeviceId($this->deviceId);

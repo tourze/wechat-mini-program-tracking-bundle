@@ -11,7 +11,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Tourze\Symfony\CronJob\Attribute\AsCronTask;
 use WechatMiniProgramTrackingBundle\Repository\PageVisitLogRepository;
 
-#[AsCronTask('*/10 * * * *')]
+#[AsCronTask(expression: '*/10 * * * *')]
 #[AsCommand(name: self::NAME, description: '定期修正页面访问日志的创建人信息')]
 class RefinePageLogInfoCommand extends Command
 {

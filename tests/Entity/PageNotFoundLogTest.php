@@ -44,14 +44,19 @@ class PageNotFoundLogTest extends TestCase
     }
 
     /**
-     * 测试 ID 字段的只读性（不应有 setId 方法）
+     * 测试 ID 字段的 getter 和 setter 方法（使用 SnowflakeKeyAware trait）
      */
-    public function testIdFieldIsReadOnly(): void
+    public function testIdFieldMethods(): void
     {
         $entity = new PageNotFoundLog();
 
-        // 使用反射API检查setId方法不存在
+        // 使用反射API检查setId方法存在（从 SnowflakeKeyAware trait）
         $reflection = new \ReflectionClass($entity);
-        $this->assertFalse($reflection->hasMethod('setId'));
+        $this->assertTrue($reflection->hasMethod('setId'));
+        $this->assertTrue($reflection->hasMethod('getId'));
+        
+        // 测试 setId 和 getId 方法
+        $entity->setId('123456789');
+        $this->assertSame('123456789', $entity->getId());
     }
 }

@@ -16,8 +16,8 @@ use WechatMiniProgramTrackingBundle\Entity\PageVisitLog;
 /**
  * 记录当前接口访问时，前端正在访问的小程序页面路径
  */
-#[AutoconfigureTag('monolog.processor')]
-#[AutoconfigureTag('as-coroutine')]
+#[AutoconfigureTag(name: 'monolog.processor')]
+#[AutoconfigureTag(name: 'as-coroutine')]
 class RequestProcessor implements ProcessorInterface
 {
     /**
@@ -112,7 +112,7 @@ class RequestProcessor implements ProcessorInterface
         if ((bool) isset($page[1])) {
             parse_str($page[1], $query);
         }
-        $log->setQuery($query ?: (object) []);
+        $log->setQuery($query !== [] ? $query : (object) []);
         $log->setSessionId($this->sessionId);
         $log->setRouteId((int) $this->routeId);
         $token = $this->tokenStorage->getToken();
