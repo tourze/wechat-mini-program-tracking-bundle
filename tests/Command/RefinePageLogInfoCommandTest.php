@@ -2,177 +2,110 @@
 
 namespace WechatMiniProgramTrackingBundle\Tests\Command;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Query;
-use Doctrine\ORM\QueryBuilder;
-use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Application;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
+use Tourze\PHPUnitSymfonyKernelTest\AbstractCommandTestCase;
 use WechatMiniProgramTrackingBundle\Command\RefinePageLogInfoCommand;
 use WechatMiniProgramTrackingBundle\Entity\PageVisitLog;
-use WechatMiniProgramTrackingBundle\Repository\PageVisitLogRepository;
 
-class RefinePageLogInfoCommandTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(RefinePageLogInfoCommand::class)]
+#[RunTestsInSeparateProcesses]
+final class RefinePageLogInfoCommandTest extends AbstractCommandTestCase
 {
-    private EntityManagerInterface $entityManager;
-    private PageVisitLogRepository $repository;
     private RefinePageLogInfoCommand $command;
+
     private CommandTester $commandTester;
 
-    protected function setUp(): void
+    protected function onSetUp(): void
     {
-        // 创建模拟对象
-        $this->repository = $this->createMock(PageVisitLogRepository::class);
-        $this->entityManager = $this->createMock(EntityManagerInterface::class);
+        $this->setUpTestServices();
+    }
 
-        // 创建被测命令
-        $this->command = new RefinePageLogInfoCommand(
-            $this->repository,
-            $this->entityManager
-        );
+    protected function getCommandTester(): CommandTester
+    {
+        return $this->commandTester;
+    }
 
-        // 创建应用并注册命令
-        $application = new Application();
-        $application->add($this->command);
+    public function testExecuteWithNoDataReturnsSuccess(): void
+    {
+        // 清空数据库，确保没有需要更新的记录
+        self::getEntityManager()->createQuery('DELETE FROM ' . PageVisitLog::class)->execute();
 
-        // 创建命令测试器
+        $result = $this->commandTester->execute([]);
+
+        $this->assertEquals(Command::SUCCESS, $result);
+    }
+
+    private function setUpTestServices(): void
+    {
+        $this->command = self::getService(RefinePageLogInfoCommand::class);
         $this->commandTester = new CommandTester($this->command);
     }
 
-    /**
-     * 测试命令基本执行流程
-     */
-    public function testExecute(): void
+    public function testExecuteWithDataButNoSessionMatchReturnsSuccess(): void
     {
-        // 创建模拟查询构建器
-        $queryBuilder = $this->createMock(QueryBuilder::class);
-        $query = $this->createMock(Query::class);
+        // 清空数据库
+        self::getEntityManager()->createQuery('DELETE FROM ' . PageVisitLog::class)->execute();
 
-        // 创建模拟日志数据
-        $logItem1 = new PageVisitLog();
-        $logItem1->setSessionId('session1');
-        $logItem1->setPage('/pages/index');
-        $logItem1->setRouteId(1);
+        // 创建测试数据：一个没有 createdBy 的记录
+        $pageVisitLog = new PageVisitLog();
+        $pageVisitLog->setPage('pages/test/test');
+        $pageVisitLog->setRouteId(1);
+        $pageVisitLog->setSessionId('test-session-id');
+        $pageVisitLog->setCreateTime(new \DateTimeImmutable());
+        // 不设置 createdBy，保持为 null
 
-        $logItem2 = new PageVisitLog();
-        $logItem2->setSessionId('session1');
-        $logItem2->setPage('/pages/detail');
-        $logItem2->setRouteId(2);
-        $logItem2->setCreatedBy('user1');
+        self::getEntityManager()->persist($pageVisitLog);
+        self::getEntityManager()->flush();
 
-        // 配置 Repository->createQueryBuilder 返回模拟查询构建器
-        $this->repository->expects($this->exactly(2))
-            ->method('createQueryBuilder')
-            ->willReturn($queryBuilder);
+        $result = $this->commandTester->execute([]);
 
-        // 配置查询构建器链式调用
-        $queryBuilder->expects($this->exactly(2))
-            ->method('where')
-            ->willReturn($queryBuilder);
-
-        $queryBuilder->expects($this->exactly(3))
-            ->method('setParameter')
-            ->willReturn($queryBuilder);
-
-        $queryBuilder->expects($this->once())
-            ->method('setMaxResults')
-            ->willReturn($queryBuilder);
-
-        $queryBuilder->expects($this->exactly(2))
-            ->method('getQuery')
-            ->willReturn($query);
-
-        // 配置第一个查询结果为已有日志数组
-        $query->expects($this->once())
-            ->method('toIterable')
-            ->willReturn([$logItem1]);
-
-        // 配置第二个查询结果为带有 createdBy 的日志
-        $query->expects($this->once())
-            ->method('getOneOrNullResult')
-            ->willReturn($logItem2);
-
-        // 配置 EntityManager 方法
-        $this->entityManager->expects($this->once())
-            ->method('persist')
-            ->with($logItem1);
-
-        $this->entityManager->expects($this->once())
-            ->method('flush');
-
-        // 执行命令
-        $exitCode = $this->commandTester->execute([]);
-
-        // 验证输出和返回值
-        $output = $this->commandTester->getDisplay();
-        $this->assertNotEmpty($output); // 应输出日志 ID
-        $this->assertEquals(0, $exitCode); // 成功返回值为 0
-
-        // 验证日志更新
-        $this->assertEquals('user1', $logItem1->getCreatedBy());
+        $this->assertEquals(Command::SUCCESS, $result);
     }
 
-    /**
-     * 测试当没有找到匹配的日志条目时的行为
-     */
-    public function testExecuteWithNoMatchingLog(): void
+    public function testExecuteWithDataAndSessionMatchUpdatesCreatedBy(): void
     {
-        // 创建模拟查询构建器
-        $queryBuilder = $this->createMock(QueryBuilder::class);
-        $query = $this->createMock(Query::class);
+        // 清空数据库
+        self::getEntityManager()->createQuery('DELETE FROM ' . PageVisitLog::class)->execute();
 
-        // 创建模拟日志数据
-        $logItem = new PageVisitLog();
-        $logItem->setSessionId('session1');
-        $logItem->setPage('/pages/index');
-        $logItem->setRouteId(1);
+        // 创建测试数据：
+        // 1. 一个有 createdBy 的记录（作为参考）
+        $referenceLog = new PageVisitLog();
+        $referenceLog->setPage('pages/reference/reference');
+        $referenceLog->setRouteId(1);
+        $referenceLog->setSessionId('test-session-id');
+        $referenceLog->setCreatedBy('test-user');
+        $referenceLog->setCreateTime(new \DateTimeImmutable());
 
-        // 配置 Repository->createQueryBuilder 返回模拟查询构建器
-        $this->repository->expects($this->exactly(2))
-            ->method('createQueryBuilder')
-            ->willReturn($queryBuilder);
+        // 2. 一个没有 createdBy 的记录（需要更新）
+        $logToUpdate = new PageVisitLog();
+        $logToUpdate->setPage('pages/update/update');
+        $logToUpdate->setRouteId(2);
+        $logToUpdate->setSessionId('test-session-id');
+        $logToUpdate->setCreateTime(new \DateTimeImmutable());
+        // 不设置 createdBy，保持为 null
 
-        // 配置查询构建器链式调用
-        $queryBuilder->expects($this->exactly(2))
-            ->method('where')
-            ->willReturn($queryBuilder);
+        self::getEntityManager()->persist($referenceLog);
+        self::getEntityManager()->persist($logToUpdate);
+        self::getEntityManager()->flush();
 
-        $queryBuilder->expects($this->exactly(3))
-            ->method('setParameter')
-            ->willReturn($queryBuilder);
+        $result = $this->commandTester->execute([]);
 
-        $queryBuilder->expects($this->once())
-            ->method('setMaxResults')
-            ->willReturn($queryBuilder);
+        $this->assertEquals(Command::SUCCESS, $result);
 
-        $queryBuilder->expects($this->exactly(2))
-            ->method('getQuery')
-            ->willReturn($query);
+        // 验证更新后的记录有了 createdBy
+        self::getEntityManager()->refresh($logToUpdate);
+        $this->assertEquals('test-user', $logToUpdate->getCreatedBy());
+    }
 
-        // 配置第一个查询结果为已有日志数组
-        $query->expects($this->once())
-            ->method('toIterable')
-            ->willReturn([$logItem]);
-
-        // 配置第二个查询结果为 null（没有找到匹配的记录）
-        $query->expects($this->once())
-            ->method('getOneOrNullResult')
-            ->willReturn(null);
-
-        // EntityManager 不应调用 persist 和 flush
-        $this->entityManager->expects($this->never())
-            ->method('persist');
-
-        $this->entityManager->expects($this->never())
-            ->method('flush');
-
-        // 执行命令
-        $exitCode = $this->commandTester->execute([]);
-
-        // 验证输出和返回值
-        $this->assertEquals(0, $exitCode); // 成功返回值为 0
-
-        // 验证日志未更新
-        $this->assertNull($logItem->getCreatedBy());
+    public function testCommandNameIsCorrect(): void
+    {
+        $this->assertEquals('wechat-mini-program:refine-page-log-info', RefinePageLogInfoCommand::NAME);
+        $this->assertEquals('wechat-mini-program:refine-page-log-info', $this->command->getName());
     }
 }

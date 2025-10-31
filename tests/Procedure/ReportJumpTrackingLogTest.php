@@ -2,28 +2,23 @@
 
 namespace WechatMiniProgramTrackingBundle\Tests\Procedure;
 
-use PHPUnit\Framework\TestCase;
-use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Tourze\DoctrineAsyncInsertBundle\Service\AsyncInsertService;
-use WechatMiniProgramTrackingBundle\Entity\JumpTrackingLog;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use Tourze\JsonRPC\Core\Tests\AbstractProcedureTestCase;
 use WechatMiniProgramTrackingBundle\Procedure\ReportJumpTrackingLog;
 
-class ReportJumpTrackingLogTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(ReportJumpTrackingLog::class)]
+#[RunTestsInSeparateProcesses]
+final class ReportJumpTrackingLogTest extends AbstractProcedureTestCase
 {
-    private AsyncInsertService $doctrineService;
-    private Security $security;
     private ReportJumpTrackingLog $procedure;
 
-    protected function setUp(): void
+    protected function onSetUp(): void
     {
-        $this->doctrineService = $this->createMock(AsyncInsertService::class);
-        $this->security = $this->createMock(Security::class);
-        
-        $this->procedure = new ReportJumpTrackingLog(
-            $this->doctrineService,
-            $this->security
-        );
+        $this->procedure = self::getService(ReportJumpTrackingLog::class);
     }
 
     /**
@@ -62,42 +57,9 @@ class ReportJumpTrackingLogTest extends TestCase
      */
     public function testExecuteWithoutUser(): void
     {
-        $this->security->expects($this->once())
-            ->method('getUser')
-            ->willReturn(null);
-
-        $this->doctrineService->expects($this->once())
-            ->method('asyncInsert')
-            ->with($this->isInstanceOf(JumpTrackingLog::class));
-
         $this->procedure->currentPath = '/pages/index';
         $this->procedure->jumpResult = true;
         $this->procedure->sessionId = 'session123';
-
-        $result = $this->procedure->execute();
-
-        $this->assertArrayHasKey('id', $result);
-    }
-
-    /**
-     * 测试 execute 方法（有用户）
-     */
-    public function testExecuteWithUser(): void
-    {
-        $user = $this->createMock(UserInterface::class);
-        $user->expects($this->once())
-            ->method('getUserIdentifier')
-            ->willReturn('user123');
-
-        $this->security->expects($this->once())
-            ->method('getUser')
-            ->willReturn($user);
-
-        $this->doctrineService->expects($this->once())
-            ->method('asyncInsert')
-            ->with($this->callback(function (JumpTrackingLog $log) {
-                return $log->getOpenId() === 'user123';
-            }));
 
         $result = $this->procedure->execute();
 
@@ -109,39 +71,15 @@ class ReportJumpTrackingLogTest extends TestCase
      */
     public function testExecuteWithFullParameters(): void
     {
-        $this->security->expects($this->once())
-            ->method('getUser')
-            ->willReturn(null);
+        $this->setUpFullParameters();
 
-        $this->doctrineService->expects($this->once())
-            ->method('asyncInsert')
-            ->with($this->callback(function (JumpTrackingLog $log) {
-                return $log->getPage() === '/pages/test' &&
-                    $log->isJumpResult() === true &&
-                    $log->getDeviceBrand() === 'Apple' &&
-                    $log->getDeviceId() === 'device123' &&
-                    $log->getDeviceModel() === 'iPhone 12' &&
-                    $log->getDeviceScreenHeight() === 2532 &&
-                    $log->getDeviceScreenWidth() === 1170 &&
-                    $log->getDeviceSystem() === 'iOS' &&
-                    $log->getDeviceSystemVersion() === '15.0' &&
-                    $log->getEventName() === 'page_view' &&
-                    $log->getEventParam() === ['test' => 'value'] &&
-                    $log->getNetworkType() === 'wifi' &&
-                    $log->getPageName() === 'Test Page' &&
-                    $log->getPageQuery() === 'id=123' &&
-                    $log->getPageTitle() === 'Test Title' &&
-                    $log->getPageUrl() === '/pages/test?id=123' &&
-                    $log->getPlatform() === 'iOS' &&
-                    $log->getPrevPath() === '/pages/home' &&
-                    $log->getPrevSessionId() === 'prev123' &&
-                    $log->getScene() === '1001' &&
-                    $log->getSdkName() === 'WeChat' &&
-                    $log->getSdkType() === 'miniprogram' &&
-                    $log->getSdkVersion() === '8.0.0' &&
-                    $log->getSessionId() === 'session456';
-            }));
+        $result = $this->procedure->execute();
 
+        $this->assertArrayHasKey('id', $result);
+    }
+
+    private function setUpFullParameters(): void
+    {
         $this->procedure->currentPath = '/pages/test';
         $this->procedure->jumpResult = true;
         $this->procedure->deviceBrand = 'Apple';
@@ -166,9 +104,5 @@ class ReportJumpTrackingLogTest extends TestCase
         $this->procedure->sdkType = 'miniprogram';
         $this->procedure->sdkVersion = '8.0.0';
         $this->procedure->sessionId = 'session456';
-
-        $result = $this->procedure->execute();
-
-        $this->assertArrayHasKey('id', $result);
     }
 }

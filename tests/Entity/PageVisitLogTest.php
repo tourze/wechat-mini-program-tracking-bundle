@@ -2,21 +2,31 @@
 
 namespace WechatMiniProgramTrackingBundle\Tests\Entity;
 
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tourze\PHPUnitDoctrineEntity\AbstractEntityTestCase;
 use WechatMiniProgramTrackingBundle\Entity\PageVisitLog;
 
-class PageVisitLogTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(PageVisitLog::class)]
+final class PageVisitLogTest extends AbstractEntityTestCase
 {
+    protected function createEntity(): PageVisitLog
+    {
+        return new PageVisitLog();
+    }
+
     /**
      * 测试 getter 和 setter 方法是否正常工作
      */
     public function testGetterAndSetter(): void
     {
-        $entity = new PageVisitLog();
+        $entity = $this->createEntity();
 
         // 测试 page 属性
-        $entity->setPage('/pages/index/index');
-        $this->assertSame('/pages/index/index', $entity->getPage());
+        $entity->setPage('pages' . DIRECTORY_SEPARATOR . 'index' . DIRECTORY_SEPARATOR . 'index');
+        $this->assertSame('pages' . DIRECTORY_SEPARATOR . 'index' . DIRECTORY_SEPARATOR . 'index', $entity->getPage());
 
         // 测试 routeId 属性
         $entity->setRouteId(123);
@@ -49,7 +59,7 @@ class PageVisitLogTest extends TestCase
      */
     public function testCreateTimeGetterAndSetter(): void
     {
-        $entity = new PageVisitLog();
+        $entity = $this->createEntity();
         $dateTime = new \DateTimeImmutable();
 
         $entity->setCreateTime($dateTime);
@@ -57,18 +67,27 @@ class PageVisitLogTest extends TestCase
     }
 
     /**
-     * 测试流畅接口（链式调用）
+     * 测试setter方法返回void（PHP标准实体模式）
      */
-    public function testFluentInterface(): void
+    public function testSetterReturnVoid(): void
     {
-        $entity = new PageVisitLog();
+        $entity = $this->createEntity();
 
-        $this->assertInstanceOf(PageVisitLog::class, $entity->setPage('/pages/index/index'));
-        $this->assertInstanceOf(PageVisitLog::class, $entity->setRouteId(123));
-        $this->assertInstanceOf(PageVisitLog::class, $entity->setSessionId('test-session-id'));
-        $this->assertInstanceOf(PageVisitLog::class, $entity->setQuery(['param' => 'value']));
-        $this->assertInstanceOf(PageVisitLog::class, $entity->setCreatedFromUa('test-user-agent'));
-        $this->assertInstanceOf(PageVisitLog::class, $entity->setCreateTime(new \DateTimeImmutable()));
+        // Setter方法返回void，直接调用而不断言返回值
+        $entity->setPage('pages' . DIRECTORY_SEPARATOR . 'index' . DIRECTORY_SEPARATOR . 'index');
+        $entity->setRouteId(123);
+        $entity->setSessionId('test-session-id');
+        $entity->setQuery(['param' => 'value']);
+        $entity->setCreatedFromUa('test-user-agent');
+        $entity->setCreateTime(new \DateTimeImmutable());
+
+        // 验证setter方法确实设置了值
+        self::assertSame('pages' . DIRECTORY_SEPARATOR . 'index' . DIRECTORY_SEPARATOR . 'index', $entity->getPage());
+        self::assertSame(123, $entity->getRouteId());
+        self::assertSame('test-session-id', $entity->getSessionId());
+        self::assertSame(['param' => 'value'], $entity->getQuery());
+        self::assertSame('test-user-agent', $entity->getCreatedFromUa());
+        self::assertInstanceOf(\DateTimeImmutable::class, $entity->getCreateTime());
     }
 
     /**
@@ -76,10 +95,10 @@ class PageVisitLogTest extends TestCase
      */
     public function testIdFieldIsReadOnly(): void
     {
-        $entity = new PageVisitLog();
+        $entity = $this->createEntity();
 
         // 确认有 getId 方法
-        $this->assertIsInt($entity->getId()); // 初始值可能为 0 而不是 null
+        $this->assertSame(0, $entity->getId()); // 初始值为 0
 
         // 使用反射API检查setId方法不存在
         $reflection = new \ReflectionClass($entity);
@@ -91,7 +110,7 @@ class PageVisitLogTest extends TestCase
      */
     public function testQueryDefaultValue(): void
     {
-        $entity = new PageVisitLog();
+        $entity = $this->createEntity();
         $this->assertNull($entity->getQuery());
     }
 
@@ -100,7 +119,7 @@ class PageVisitLogTest extends TestCase
      */
     public function testEmptyQueryBehavior(): void
     {
-        $entity = new PageVisitLog();
+        $entity = $this->createEntity();
 
         // 设置空数组作为查询参数
         $entity->setQuery([]);
@@ -109,5 +128,21 @@ class PageVisitLogTest extends TestCase
         // 设置 null 作为查询参数
         $entity->setQuery(null);
         $this->assertNull($entity->getQuery());
+    }
+
+    /**
+     * 提供属性及其样本值的 Data Provider.
+     *
+     * @return iterable<string, array{string, mixed}>
+     */
+    public static function propertiesProvider(): iterable
+    {
+        yield 'page' => ['page', 'pages/index/index'];
+        yield 'routeId' => ['routeId', 123];
+        yield 'sessionId' => ['sessionId', 'test-session-123'];
+        yield 'query' => ['query', ['param1' => 'value1', 'param2' => 'value2']];
+        yield 'createdFromUa' => ['createdFromUa', 'Mozilla/5.0 Test User Agent'];
+        yield 'createTime' => ['createTime', new \DateTimeImmutable()];
+        yield 'createdFromIp' => ['createdFromIp', '127.0.0.1'];
     }
 }

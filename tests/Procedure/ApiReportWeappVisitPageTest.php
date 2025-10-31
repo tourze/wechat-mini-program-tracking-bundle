@@ -2,16 +2,23 @@
 
 namespace WechatMiniProgramTrackingBundle\Tests\Procedure;
 
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use Tourze\JsonRPC\Core\Tests\AbstractProcedureTestCase;
 use WechatMiniProgramTrackingBundle\Procedure\ApiReportWeappVisitPage;
 
-class ApiReportWeappVisitPageTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(ApiReportWeappVisitPage::class)]
+#[RunTestsInSeparateProcesses]
+final class ApiReportWeappVisitPageTest extends AbstractProcedureTestCase
 {
     private ApiReportWeappVisitPage $procedure;
 
-    protected function setUp(): void
+    protected function onSetUp(): void
     {
-        $this->procedure = new ApiReportWeappVisitPage();
+        $this->procedure = self::getService(ApiReportWeappVisitPage::class);
     }
 
     /**
@@ -20,7 +27,7 @@ class ApiReportWeappVisitPageTest extends TestCase
     public function testExecuteReturnsSuccess(): void
     {
         $result = $this->procedure->execute();
-        
+
         $this->assertArrayHasKey('ok', $result);
         $this->assertEquals(1, $result['ok']);
     }

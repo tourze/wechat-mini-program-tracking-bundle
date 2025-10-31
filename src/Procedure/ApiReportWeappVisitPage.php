@@ -1,10 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace WechatMiniProgramTrackingBundle\Procedure;
 
+use Tourze\JsonRPC\Core\Attribute\MethodDoc;
 use Tourze\JsonRPC\Core\Attribute\MethodExpose;
+use Tourze\JsonRPC\Core\Attribute\MethodTag;
 use Tourze\JsonRPCLockBundle\Procedure\LockableProcedure;
 
+#[MethodTag(name: '微信小程序')]
+#[MethodDoc(summary: '小程序启动访问上报接口')]
 #[MethodExpose(method: 'apiReportWeappVisitPage')]
 class ApiReportWeappVisitPage extends LockableProcedure
 {
@@ -14,12 +20,12 @@ class ApiReportWeappVisitPage extends LockableProcedure
     public $path;
 
     /**
-     * @var array 参数
+     * @var array<string, mixed> 参数
      */
     public $query;
 
     /**
-     * @var array 访问来源信息
+     * @var array<string, mixed> 访问来源信息
      */
     public $referrerInfo = [];
 
@@ -33,6 +39,9 @@ class ApiReportWeappVisitPage extends LockableProcedure
      */
     public $shareTicket = '';
 
+    /**
+     * @return array<string, mixed>
+     */
     public function execute(): array
     {
         return [

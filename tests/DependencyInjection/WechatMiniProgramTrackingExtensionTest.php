@@ -2,29 +2,16 @@
 
 namespace WechatMiniProgramTrackingBundle\Tests\DependencyInjection;
 
-use PHPUnit\Framework\TestCase;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tourze\PHPUnitSymfonyUnitTest\AbstractDependencyInjectionExtensionTestCase;
 use WechatMiniProgramTrackingBundle\DependencyInjection\WechatMiniProgramTrackingExtension;
 
-class WechatMiniProgramTrackingExtensionTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(WechatMiniProgramTrackingExtension::class)]
+final class WechatMiniProgramTrackingExtensionTest extends AbstractDependencyInjectionExtensionTestCase
 {
-    /**
-     * 测试加载配置
-     */
-    public function testLoad(): void
-    {
-        $container = new ContainerBuilder();
-
-        // 创建扩展实例
-        $extension = new WechatMiniProgramTrackingExtension();
-
-        // 调用扩展的load方法
-        $extension->load([], $container);
-
-        // 由于我们不能直接修改 load 方法的实现，这里我们主要测试它不会抛出异常
-        $this->assertTrue(true);
-    }
-
     /**
      * 测试 services.yaml 是否正确加载
      *
@@ -32,8 +19,19 @@ class WechatMiniProgramTrackingExtensionTest extends TestCase
      */
     public function testServicesYamlExists(): void
     {
-        $configPath = dirname(__DIR__, 2) . '/src/Resources/config';
+        $configPath = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Resources' . DIRECTORY_SEPARATOR . 'config';
         $this->assertDirectoryExists($configPath);
-        $this->assertFileExists($configPath . '/services.yaml');
+        $this->assertFileExists($configPath . DIRECTORY_SEPARATOR . 'services.yaml');
+    }
+
+    /**
+     * 创建 WechatMiniProgramTrackingExtension 实例的工厂方法
+     *
+     * @phpstan-ignore-next-line 为了测试目的，允许在工厂方法中直接实例化扩展类
+     */
+    private function createExtension(): WechatMiniProgramTrackingExtension
+    {
+        /** @phpstan-ignore-next-line */
+        return new WechatMiniProgramTrackingExtension();
     }
 }

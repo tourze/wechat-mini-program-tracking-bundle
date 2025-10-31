@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace WechatMiniProgramTrackingBundle\Procedure;
 
 use Symfony\Bundle\SecurityBundle\Security;
@@ -59,6 +61,9 @@ class ReportJumpTrackingLog extends BaseProcedure
     #[MethodParam(description: '事件名称')]
     public ?string $eventName = null;
 
+    /**
+     * @var array<string, mixed>|null
+     */
     #[MethodParam(description: '事件参数')]
     public ?array $eventParam = null;
 
@@ -101,13 +106,18 @@ class ReportJumpTrackingLog extends BaseProcedure
     #[MethodParam(description: '会话ID')]
     public ?string $sessionId = null;
 
+    /**
+     * @return array<string, mixed>
+     */
     public function execute(): array
     {
         $jumpTrackingLog = new JumpTrackingLog();
         if (null !== $this->currentPath) {
             $jumpTrackingLog->setPage($this->currentPath);
         }
-        $jumpTrackingLog->setJumpResult($this->jumpResult);
+        if (null !== $this->jumpResult) {
+            $jumpTrackingLog->setJumpResult($this->jumpResult);
+        }
         $jumpTrackingLog->setDeviceBrand($this->deviceBrand);
         $jumpTrackingLog->setDeviceId($this->deviceId);
         $jumpTrackingLog->setDeviceModel($this->deviceModel);

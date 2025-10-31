@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace WechatMiniProgramTrackingBundle\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Stringable;
+use Symfony\Component\Validator\Constraints as Assert;
 use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
 use Tourze\DoctrineUserAgentBundle\Attribute\CreateUserAgentColumn;
 use Tourze\DoctrineUserBundle\Traits\CreatedByAware;
@@ -14,127 +16,169 @@ use WechatMiniProgramTrackingBundle\Repository\JumpTrackingLogRepository;
 #[AsScheduleClean(expression: '23 4 * * *', defaultKeepDay: 30, keepDayEnv: 'JUMP_TRACKING_LOG_PERSIST_DAY_NUM')]
 #[ORM\Entity(repositoryClass: JumpTrackingLogRepository::class)]
 #[ORM\Table(name: 'wechat_mini_program_jump_tracking_log', options: ['comment' => '跳转tracking日志'])]
-#[ORM\Index(columns: ['page'], name: 'idx_page')]
-class JumpTrackingLog implements Stringable
+class JumpTrackingLog implements \Stringable
 {
     use CreatedByAware;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => 'ID'])]
-    private ?int $id = 0;
+    private int $id = 0;
 
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }
 
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 255)]
+    #[IndexColumn]
+    #[ORM\Column(length: 255, options: ['comment' => '页面路径'])]
     private string $page;
 
+    #[Assert\Length(max: 100)]
+    #[ORM\Column(length: 100, nullable: true, options: ['comment' => 'OpenID'])]
     private ?string $openId = null;
 
+    #[Assert\Length(max: 100)]
+    #[ORM\Column(length: 100, nullable: true, options: ['comment' => 'UnionID'])]
     private ?string $unionId = null;
 
+    /**
+     * @var array<string, mixed>|null
+     */
+    #[Assert\Valid]
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['comment' => '参数'])]
     private ?array $query = null;
 
-#[ORM\Column(length: 100, nullable: true, options: ['comment' => '字段说明'])]
+    #[Assert\Length(max: 100)]
+    #[ORM\Column(length: 100, nullable: true, options: ['comment' => '字段说明'])]
     private ?string $appKey = null;
 
     // 添加 businessChannel 变量
+    #[Assert\Length(max: 255)]
     #[ORM\Column(length: 255, nullable: true, options: ['comment' => '业务渠道'])]
     private ?string $businessChannel = null;
 
     // 添加 deviceBrand 变量
+    #[Assert\Length(max: 100)]
     #[ORM\Column(length: 100, nullable: true, options: ['comment' => '设备品牌'])]
     private ?string $deviceBrand = null;
 
     // 添加 deviceId 变量
+    #[Assert\Length(max: 255)]
     #[ORM\Column(length: 255, nullable: true, options: ['comment' => '设备ID'])]
     private ?string $deviceId = null;
 
     // 添加 deviceModel 变量
+    #[Assert\Length(max: 255)]
     #[ORM\Column(length: 255, nullable: true, options: ['comment' => '设备型号'])]
     private ?string $deviceModel = null;
 
     // 添加 deviceScreenHeight 变量
+    #[Assert\PositiveOrZero]
     #[ORM\Column(type: Types::INTEGER, nullable: true, options: ['comment' => '设备屏幕高度'])]
     private ?int $deviceScreenHeight = null;
 
     // 添加 deviceScreenWidth 变量
+    #[Assert\PositiveOrZero]
     #[ORM\Column(type: Types::INTEGER, nullable: true, options: ['comment' => '设备屏幕宽度'])]
     private ?int $deviceScreenWidth = null;
 
     // 添加 deviceSystem 变量
+    #[Assert\Length(max: 100)]
     #[ORM\Column(length: 100, nullable: true, options: ['comment' => '设备系统'])]
     private ?string $deviceSystem = null;
 
     // 添加 deviceSystemVersion 变量
+    #[Assert\Length(max: 50)]
     #[ORM\Column(length: 50, nullable: true, options: ['comment' => '设备系统版本'])]
     private ?string $deviceSystemVersion = null;
 
     // 添加 eventName 变量
+    #[Assert\Length(max: 255)]
     #[ORM\Column(length: 255, nullable: true, options: ['comment' => '事件名称'])]
     private ?string $eventName = null;
 
     // 添加 eventParam 变量
+    /**
+     * @var array<string, mixed>|null
+     */
+    #[Assert\Valid]
     #[ORM\Column(type: Types::JSON, nullable: true, options: ['comment' => '事件参数'])]
     private ?array $eventParam = null;
 
     // 添加 networkType 变量
+    #[Assert\Length(max: 50)]
     #[ORM\Column(length: 50, nullable: true, options: ['comment' => '网络类型'])]
     private ?string $networkType = null;
 
     // 添加 pageName 变量
+    #[Assert\Length(max: 255)]
     #[ORM\Column(length: 255, nullable: true, options: ['comment' => '页面名称'])]
     private ?string $pageName = null;
 
     // 添加 pageQuery 变量
+    #[Assert\Length(max: 255)]
     #[ORM\Column(length: 255, nullable: true, options: ['comment' => '页面查询参数'])]
     private ?string $pageQuery = null;
 
     // 添加 pageTitle 变量
+    #[Assert\Length(max: 255)]
     #[ORM\Column(length: 255, nullable: true, options: ['comment' => '页面标题'])]
     private ?string $pageTitle = null;
 
     // 添加 pageUrl 变量
+    #[Assert\Length(max: 255)]
+    #[Assert\Url]
     #[ORM\Column(length: 255, nullable: true, options: ['comment' => '页面URL'])]
     private ?string $pageUrl = null;
 
     // 添加 platform 变量
+    #[Assert\Length(max: 50)]
     #[ORM\Column(length: 50, nullable: true, options: ['comment' => '平台'])]
     private ?string $platform = null;
 
     // 添加 prevPath 变量
+    #[Assert\Length(max: 255)]
     #[ORM\Column(length: 255, nullable: true, options: ['comment' => '前一个路径'])]
     private ?string $prevPath = null;
 
     // 添加 prevSessionId 变量
+    #[Assert\Length(max: 255)]
     #[ORM\Column(length: 255, nullable: true, options: ['comment' => '前一个会话ID'])]
     private ?string $prevSessionId = null;
 
     // 添加 scene 变量
+    #[Assert\Length(max: 255)]
     #[ORM\Column(length: 255, nullable: true, options: ['comment' => '场景'])]
     private ?string $scene = null;
 
     // 添加 sdkName 变量
+    #[Assert\Length(max: 100)]
     #[ORM\Column(length: 100, nullable: true, options: ['comment' => 'SDK名称'])]
     private ?string $sdkName = null;
 
     // 添加 sdkType 变量
+    #[Assert\Length(max: 50)]
     #[ORM\Column(length: 50, nullable: true, options: ['comment' => 'SDK类型'])]
     private ?string $sdkType = null;
 
     // 添加 sdkVersion 变量
+    #[Assert\Length(max: 50)]
     #[ORM\Column(length: 50, nullable: true, options: ['comment' => 'SDK版本'])]
     private ?string $sdkVersion = null;
 
     // 添加 sessionId 变量
+    #[Assert\Length(max: 255)]
     #[ORM\Column(length: 255, nullable: true, options: ['comment' => '会话ID'])]
     private ?string $sessionId = null;
 
+    #[Assert\Type(type: 'bool')]
     #[ORM\Column(options: ['comment' => '跳转结果'])]
     private ?bool $jumpResult = null;
 
+    #[Assert\Length(max: 500)]
     #[CreateUserAgentColumn]
     private ?string $createdFromUa = null;
 
@@ -147,11 +191,9 @@ class JumpTrackingLog implements Stringable
         return $this->page;
     }
 
-    public function setPage(string $page): self
+    public function setPage(string $page): void
     {
         $this->page = $page;
-
-        return $this;
     }
 
     public function getOpenId(): ?string
@@ -159,11 +201,9 @@ class JumpTrackingLog implements Stringable
         return $this->openId;
     }
 
-    public function setOpenId(?string $openId): self
+    public function setOpenId(?string $openId): void
     {
         $this->openId = $openId;
-
-        return $this;
     }
 
     public function getUnionId(): ?string
@@ -171,23 +211,36 @@ class JumpTrackingLog implements Stringable
         return $this->unionId;
     }
 
-    public function setUnionId(?string $unionId): static
+    public function setUnionId(?string $unionId): void
     {
         $this->unionId = $unionId;
-
-        return $this;
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     public function getQuery(): ?array
     {
         return $this->query;
     }
 
-    public function setQuery(?array $query): static
+    public function getQueryAsJson(): string
+    {
+        if (null === $this->query || [] === $this->query) {
+            return '';
+        }
+
+        $encoded = json_encode($this->query, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+
+        return false === $encoded ? '' : $encoded;
+    }
+
+    /**
+     * @param array<string, mixed>|null $query
+     */
+    public function setQuery(?array $query): void
     {
         $this->query = $query;
-
-        return $this;
     }
 
     public function getAppKey(): ?string
@@ -195,11 +248,9 @@ class JumpTrackingLog implements Stringable
         return $this->appKey;
     }
 
-    public function setAppKey(?string $appKey): static
+    public function setAppKey(?string $appKey): void
     {
         $this->appKey = $appKey;
-
-        return $this;
     }
 
     // 添加 getBusinessChannel 方法
@@ -209,11 +260,9 @@ class JumpTrackingLog implements Stringable
     }
 
     // 添加 setBusinessChannel 方法
-    public function setBusinessChannel(?string $businessChannel): static
+    public function setBusinessChannel(?string $businessChannel): void
     {
         $this->businessChannel = $businessChannel;
-
-        return $this;
     }
 
     // 添加 getDeviceBrand 方法
@@ -223,11 +272,9 @@ class JumpTrackingLog implements Stringable
     }
 
     // 添加 setDeviceBrand 方法
-    public function setDeviceBrand(?string $deviceBrand): static
+    public function setDeviceBrand(?string $deviceBrand): void
     {
         $this->deviceBrand = $deviceBrand;
-
-        return $this;
     }
 
     // 添加 getDeviceId 方法
@@ -237,11 +284,9 @@ class JumpTrackingLog implements Stringable
     }
 
     // 添加 setDeviceId 方法
-    public function setDeviceId(?string $deviceId): static
+    public function setDeviceId(?string $deviceId): void
     {
         $this->deviceId = $deviceId;
-
-        return $this;
     }
 
     // 添加 getDeviceModel 方法
@@ -251,11 +296,9 @@ class JumpTrackingLog implements Stringable
     }
 
     // 添加 setDeviceModel 方法
-    public function setDeviceModel(?string $deviceModel): static
+    public function setDeviceModel(?string $deviceModel): void
     {
         $this->deviceModel = $deviceModel;
-
-        return $this;
     }
 
     // 添加 getDeviceScreenHeight 方法
@@ -265,11 +308,9 @@ class JumpTrackingLog implements Stringable
     }
 
     // 添加 setDeviceScreenHeight 方法
-    public function setDeviceScreenHeight(?int $deviceScreenHeight): static
+    public function setDeviceScreenHeight(?int $deviceScreenHeight): void
     {
         $this->deviceScreenHeight = $deviceScreenHeight;
-
-        return $this;
     }
 
     // 添加 getDeviceScreenWidth 方法
@@ -279,11 +320,9 @@ class JumpTrackingLog implements Stringable
     }
 
     // 添加 setDeviceScreenWidth 方法
-    public function setDeviceScreenWidth(?int $deviceScreenWidth): static
+    public function setDeviceScreenWidth(?int $deviceScreenWidth): void
     {
         $this->deviceScreenWidth = $deviceScreenWidth;
-
-        return $this;
     }
 
     // 添加 getDeviceSystem 方法
@@ -293,11 +332,9 @@ class JumpTrackingLog implements Stringable
     }
 
     // 添加 setDeviceSystem 方法
-    public function setDeviceSystem(?string $deviceSystem): static
+    public function setDeviceSystem(?string $deviceSystem): void
     {
         $this->deviceSystem = $deviceSystem;
-
-        return $this;
     }
 
     // 添加 getDeviceSystemVersion 方法
@@ -307,11 +344,9 @@ class JumpTrackingLog implements Stringable
     }
 
     // 添加 setDeviceSystemVersion 方法
-    public function setDeviceSystemVersion(?string $deviceSystemVersion): static
+    public function setDeviceSystemVersion(?string $deviceSystemVersion): void
     {
         $this->deviceSystemVersion = $deviceSystemVersion;
-
-        return $this;
     }
 
     // 添加 getEventName 方法
@@ -321,25 +356,38 @@ class JumpTrackingLog implements Stringable
     }
 
     // 添加 setEventName 方法
-    public function setEventName(?string $eventName): static
+    public function setEventName(?string $eventName): void
     {
         $this->eventName = $eventName;
-
-        return $this;
     }
 
     // 添加 getEventParam 方法
+    /**
+     * @return array<string, mixed>|null
+     */
     public function getEventParam(): ?array
     {
         return $this->eventParam;
     }
 
+    public function getEventParamAsJson(): string
+    {
+        if (null === $this->eventParam || [] === $this->eventParam) {
+            return '';
+        }
+
+        $encoded = json_encode($this->eventParam, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+
+        return false === $encoded ? '' : $encoded;
+    }
+
     // 添加 setEventParam 方法
-    public function setEventParam(?array $eventParam): static
+    /**
+     * @param array<string, mixed>|null $eventParam
+     */
+    public function setEventParam(?array $eventParam): void
     {
         $this->eventParam = $eventParam;
-
-        return $this;
     }
 
     // 添加 getNetworkType 方法
@@ -349,11 +397,9 @@ class JumpTrackingLog implements Stringable
     }
 
     // 添加 setNetworkType 方法
-    public function setNetworkType(?string $networkType): static
+    public function setNetworkType(?string $networkType): void
     {
         $this->networkType = $networkType;
-
-        return $this;
     }
 
     // 添加 getPageName 方法
@@ -363,11 +409,9 @@ class JumpTrackingLog implements Stringable
     }
 
     // 添加 setPageName 方法
-    public function setPageName(?string $pageName): static
+    public function setPageName(?string $pageName): void
     {
         $this->pageName = $pageName;
-
-        return $this;
     }
 
     // 添加 getPageQuery 方法
@@ -377,11 +421,9 @@ class JumpTrackingLog implements Stringable
     }
 
     // 添加 setPageQuery 方法
-    public function setPageQuery(?string $pageQuery): static
+    public function setPageQuery(?string $pageQuery): void
     {
         $this->pageQuery = $pageQuery;
-
-        return $this;
     }
 
     // 添加 getPageTitle 方法
@@ -391,11 +433,9 @@ class JumpTrackingLog implements Stringable
     }
 
     // 添加 setPageTitle 方法
-    public function setPageTitle(?string $pageTitle): static
+    public function setPageTitle(?string $pageTitle): void
     {
         $this->pageTitle = $pageTitle;
-
-        return $this;
     }
 
     // 添加 getPageUrl 方法
@@ -405,11 +445,9 @@ class JumpTrackingLog implements Stringable
     }
 
     // 添加 setPageUrl 方法
-    public function setPageUrl(?string $pageUrl): static
+    public function setPageUrl(?string $pageUrl): void
     {
         $this->pageUrl = $pageUrl;
-
-        return $this;
     }
 
     // 添加 getPlatform 方法
@@ -419,11 +457,9 @@ class JumpTrackingLog implements Stringable
     }
 
     // 添加 setPlatform 方法
-    public function setPlatform(?string $platform): static
+    public function setPlatform(?string $platform): void
     {
         $this->platform = $platform;
-
-        return $this;
     }
 
     // 添加 getPrevPath 方法
@@ -433,11 +469,9 @@ class JumpTrackingLog implements Stringable
     }
 
     // 添加 setPrevPath 方法
-    public function setPrevPath(?string $prevPath): static
+    public function setPrevPath(?string $prevPath): void
     {
         $this->prevPath = $prevPath;
-
-        return $this;
     }
 
     // 添加 getPrevSessionId 方法
@@ -447,11 +481,9 @@ class JumpTrackingLog implements Stringable
     }
 
     // 添加 setPrevSessionId 方法
-    public function setPrevSessionId(?string $prevSessionId): static
+    public function setPrevSessionId(?string $prevSessionId): void
     {
         $this->prevSessionId = $prevSessionId;
-
-        return $this;
     }
 
     // 添加 getScene 方法
@@ -461,11 +493,9 @@ class JumpTrackingLog implements Stringable
     }
 
     // 添加 setScene 方法
-    public function setScene(?string $scene): static
+    public function setScene(?string $scene): void
     {
         $this->scene = $scene;
-
-        return $this;
     }
 
     // 添加 getSdkName 方法
@@ -475,11 +505,9 @@ class JumpTrackingLog implements Stringable
     }
 
     // 添加 setSdkName 方法
-    public function setSdkName(?string $sdkName): static
+    public function setSdkName(?string $sdkName): void
     {
         $this->sdkName = $sdkName;
-
-        return $this;
     }
 
     // 添加 getSdkType 方法
@@ -489,11 +517,9 @@ class JumpTrackingLog implements Stringable
     }
 
     // 添加 setSdkType 方法
-    public function setSdkType(?string $sdkType): static
+    public function setSdkType(?string $sdkType): void
     {
         $this->sdkType = $sdkType;
-
-        return $this;
     }
 
     // 添加 getSdkVersion 方法
@@ -503,11 +529,9 @@ class JumpTrackingLog implements Stringable
     }
 
     // 添加 setSdkVersion 方法
-    public function setSdkVersion(?string $sdkVersion): static
+    public function setSdkVersion(?string $sdkVersion): void
     {
         $this->sdkVersion = $sdkVersion;
-
-        return $this;
     }
 
     // 添加 getSessionId 方法
@@ -517,11 +541,9 @@ class JumpTrackingLog implements Stringable
     }
 
     // 添加 setSessionId 方法
-    public function setSessionId(?string $sessionId): static
+    public function setSessionId(?string $sessionId): void
     {
         $this->sessionId = $sessionId;
-
-        return $this;
     }
 
     public function isJumpResult(): ?bool
@@ -529,11 +551,9 @@ class JumpTrackingLog implements Stringable
         return $this->jumpResult;
     }
 
-    public function setJumpResult(bool $jumpResult): static
+    public function setJumpResult(bool $jumpResult): void
     {
         $this->jumpResult = $jumpResult;
-
-        return $this;
     }
 
     public function getCreatedFromUa(): ?string

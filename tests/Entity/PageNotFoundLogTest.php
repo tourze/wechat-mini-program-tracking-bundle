@@ -2,17 +2,27 @@
 
 namespace WechatMiniProgramTrackingBundle\Tests\Entity;
 
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tourze\PHPUnitDoctrineEntity\AbstractEntityTestCase;
 use WechatMiniProgramTrackingBundle\Entity\PageNotFoundLog;
 
-class PageNotFoundLogTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(PageNotFoundLog::class)]
+final class PageNotFoundLogTest extends AbstractEntityTestCase
 {
+    protected function createEntity(): PageNotFoundLog
+    {
+        return new PageNotFoundLog();
+    }
+
     /**
      * 测试 getter 和 setter 方法是否正常工作
      */
     public function testGetterAndSetter(): void
     {
-        $entity = new PageNotFoundLog();
+        $entity = $this->createEntity();
 
         // 测试 ID 属性
         $this->assertNull($entity->getId());
@@ -48,15 +58,32 @@ class PageNotFoundLogTest extends TestCase
      */
     public function testIdFieldMethods(): void
     {
-        $entity = new PageNotFoundLog();
+        $entity = $this->createEntity();
 
         // 使用反射API检查setId方法存在（从 SnowflakeKeyAware trait）
         $reflection = new \ReflectionClass($entity);
         $this->assertTrue($reflection->hasMethod('setId'));
         $this->assertTrue($reflection->hasMethod('getId'));
-        
+
         // 测试 setId 和 getId 方法
         $entity->setId('123456789');
         $this->assertSame('123456789', $entity->getId());
+    }
+
+    /**
+     * 提供属性及其样本值的 Data Provider.
+     *
+     * @return iterable<string, array{string, mixed}>
+     */
+    public static function propertiesProvider(): iterable
+    {
+        yield 'createdFromUa' => ['createdFromUa', 'Mozilla/5.0 Test User Agent'];
+        yield 'updatedFromUa' => ['updatedFromUa', 'Mozilla/5.0 Updated User Agent'];
+        yield 'path' => ['path', '/pages/not-found'];
+        yield 'openType' => ['openType', 'navigate'];
+        yield 'query' => ['query', ['param1' => 'value1', 'param2' => 'value2']];
+        yield 'rawError' => ['rawError', 'Page not found error message'];
+        yield 'openId' => ['openId', 'test-openid-123'];
+        yield 'unionId' => ['unionId', 'test-unionid-456'];
     }
 }

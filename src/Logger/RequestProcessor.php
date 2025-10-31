@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace WechatMiniProgramTrackingBundle\Logger;
 
 use Monolog\LogRecord;
 use Monolog\Processor\ProcessorInterface;
-use Psr\SimpleCache\CacheInterface;
+use Psr\Cache\CacheItemPoolInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -18,6 +21,7 @@ use WechatMiniProgramTrackingBundle\Entity\PageVisitLog;
  */
 #[AutoconfigureTag(name: 'monolog.processor')]
 #[AutoconfigureTag(name: 'as-coroutine')]
+#[Autoconfigure(public: true)]
 class RequestProcessor implements ProcessorInterface
 {
     /**
@@ -37,7 +41,7 @@ class RequestProcessor implements ProcessorInterface
 
     public function __construct(
         private readonly DoctrineService $doctrineService,
-        private readonly CacheInterface $cache,
+        private readonly CacheItemPoolInterface $cache,
         private readonly TokenStorageInterface $tokenStorage,
     ) {
     }
@@ -100,7 +104,8 @@ class RequestProcessor implements ProcessorInterface
 
         // 简单的防止重复插入，这里不加锁了
         $cacheKey = 'wm-page-visit-log-' . md5($this->currentPage . $this->sessionId . $this->routeId);
-        if ($this->cache->has($cacheKey)) {
+        $cacheItem = $this->cache->getItem($cacheKey);
+        if ($cacheItem->isHit()) {
             return;
         }
 
@@ -108,11 +113,17 @@ class RequestProcessor implements ProcessorInterface
         $log = new PageVisitLog();
         $page = explode('?', $this->currentPage, 2);
         $log->setPage($page[0]);
+        /** @var array<int|string, mixed> $query */
         $query = [];
-        if ((bool) isset($page[1])) {
+        if (isset($page[1])) {
             parse_str($page[1], $query);
         }
-        $log->setQuery($query !== [] ? $query : (object) []);
+        /** @var array<string, mixed> $stringQuery */
+        $stringQuery = [];
+        foreach ($query as $key => $value) {
+            $stringQuery[(string) $key] = $value;
+        }
+        $log->setQuery([] !== $stringQuery ? $stringQuery : null);
         $log->setSessionId($this->sessionId);
         $log->setRouteId((int) $this->routeId);
         $token = $this->tokenStorage->getToken();
@@ -121,6 +132,9 @@ class RequestProcessor implements ProcessorInterface
         }
 
         $this->doctrineService->asyncInsert($log, allowDuplicate: true);
-        $this->cache->set($cacheKey, 1, 60);
+
+        $cacheItem->set(1);
+        $cacheItem->expiresAfter(60);
+        $this->cache->save($cacheItem);
     }
 }
