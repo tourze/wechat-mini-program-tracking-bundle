@@ -8,6 +8,11 @@ services:
   Psr\SimpleCache\CacheInterface:
     alias: cache.app
 
+  # Configuration class
+  WechatMiniProgramTrackingBundle\Config\TrackingConfig:
+    arguments:
+      $notFoundFallbackPage: '%env(default::null:WECHAT_MINI_PROGRAM_NOT_FOUND_FALLBACK_PAGE)%'
+
   WechatMiniProgramTrackingBundle\Command\:
     resource: '../../Command/'
   WechatMiniProgramTrackingBundle\Controller\:

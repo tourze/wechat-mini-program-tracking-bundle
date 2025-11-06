@@ -233,7 +233,7 @@ final class PageNotFoundLogRepositoryTest extends AbstractRepositoryTestCase
 
         $this->assertCount(2, $apiPages);
         foreach ($apiPages as $page) {
-            $this->assertStringStartsWith('pages/api/', (string)$page->getPath());
+            $this->assertStringStartsWith('pages/api/', (string) $page->getPath());
         }
     }
 

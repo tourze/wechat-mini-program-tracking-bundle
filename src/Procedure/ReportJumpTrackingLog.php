@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace WechatMiniProgramTrackingBundle\Procedure;
 
-use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Tourze\DoctrineAsyncInsertBundle\Service\AsyncInsertService as DoctrineService;
 use Tourze\JsonRPC\Core\Attribute\MethodDoc;
 use Tourze\JsonRPC\Core\Attribute\MethodExpose;
 use Tourze\JsonRPC\Core\Attribute\MethodParam;
 use Tourze\JsonRPC\Core\Attribute\MethodTag;
 use Tourze\JsonRPC\Core\Procedure\BaseProcedure;
 use Tourze\JsonRPCLogBundle\Attribute\Log;
-use WechatMiniProgramTrackingBundle\Entity\JumpTrackingLog;
+use WechatMiniProgramTrackingBundle\DTO\ReportJumpTrackingLogRequest;
+use WechatMiniProgramTrackingBundle\DTO\ReportJumpTrackingLogResponse;
+use WechatMiniProgramTrackingBundle\Service\JumpTrackingLogService;
 
 /**
  * 上报跳转tracking日志
@@ -26,8 +26,7 @@ use WechatMiniProgramTrackingBundle\Entity\JumpTrackingLog;
 class ReportJumpTrackingLog extends BaseProcedure
 {
     public function __construct(
-        private readonly DoctrineService $doctrineService,
-        private readonly Security $security,
+        private readonly JumpTrackingLogService $jumpTrackingLogService,
     ) {
     }
 
@@ -111,48 +110,18 @@ class ReportJumpTrackingLog extends BaseProcedure
      */
     public function execute(): array
     {
-        $jumpTrackingLog = new JumpTrackingLog();
-        if (null !== $this->currentPath) {
-            $jumpTrackingLog->setPage($this->currentPath);
-        }
-        if (null !== $this->jumpResult) {
-            $jumpTrackingLog->setJumpResult($this->jumpResult);
-        }
-        $jumpTrackingLog->setDeviceBrand($this->deviceBrand);
-        $jumpTrackingLog->setDeviceId($this->deviceId);
-        $jumpTrackingLog->setDeviceModel($this->deviceModel);
-        $jumpTrackingLog->setDeviceScreenHeight($this->deviceScreenHeight);
-        $jumpTrackingLog->setDeviceScreenWidth($this->deviceScreenWidth);
-        $jumpTrackingLog->setDeviceSystem($this->deviceSystem);
-        $jumpTrackingLog->setDeviceSystemVersion($this->deviceSystemVersion);
-        $jumpTrackingLog->setEventName($this->eventName);
-        $jumpTrackingLog->setEventParam($this->eventParam);
-        $jumpTrackingLog->setNetworkType($this->networkType);
-        $jumpTrackingLog->setPageName($this->pageName);
-        $jumpTrackingLog->setPageQuery($this->pageQuery);
-        $jumpTrackingLog->setPageTitle($this->pageTitle);
-        $jumpTrackingLog->setPageUrl($this->pageUrl);
-        $jumpTrackingLog->setPlatform($this->platform);
-        $jumpTrackingLog->setPrevPath($this->prevPath);
-        $jumpTrackingLog->setPrevSessionId($this->prevSessionId);
-        $jumpTrackingLog->setScene($this->scene);
-        $jumpTrackingLog->setSdkName($this->sdkName);
-        $jumpTrackingLog->setSdkType($this->sdkType);
-        $jumpTrackingLog->setSdkVersion($this->sdkVersion);
-        $jumpTrackingLog->setSessionId($this->sessionId);
-        $user = $this->security->getUser();
-        if (null !== $user) {
-            $jumpTrackingLog->setOpenId($user->getUserIdentifier());
-            // TODO: getIdentity() 方法需要在用户实体中实现
-            if (method_exists($user, 'getIdentity')) {
-                $jumpTrackingLog->setUnionId($user->getIdentity());
-            }
-        }
+        try {
+            // 创建请求 DTO
+            $request = ReportJumpTrackingLogRequest::fromProcedure($this);
 
-        $this->doctrineService->asyncInsert($jumpTrackingLog);
+            // 委托给服务层处理
+            $response = $this->jumpTrackingLogService->handleReport($request);
 
-        return [
-            'id' => $jumpTrackingLog->getId(),
-        ];
+            // 返回向后兼容的格式
+            return $response->toLegacyArray();
+        } catch (\Exception $e) {
+            // 异常处理，确保返回格式一致
+            return ReportJumpTrackingLogResponse::failure($e->getMessage())->toLegacyArray();
+        }
     }
 }

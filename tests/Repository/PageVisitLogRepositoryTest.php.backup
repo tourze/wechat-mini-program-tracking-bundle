@@ -1034,6 +1034,7 @@ final class PageVisitLogRepositoryTest extends AbstractRepositoryTestCase
         $this->assertEquals(3, $count);
     }
 
+    
     protected function createNewEntity(): object
     {
         $entity = new PageVisitLog();

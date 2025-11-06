@@ -29,37 +29,72 @@ class RefinePageLogInfoCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        // 确保时间一致性，只调用一次 CarbonImmutable::now()
+        $now = CarbonImmutable::now();
+        $startOfDay = $now->startOfDay();
+        $endOfDay = $now->endOfDay();
+
         /** @var iterable<PageVisitLog> $log */
         $log = $this->pageVisitLogRepository->createQueryBuilder('p')
             ->where("p.createTime between :start and :end and (p.createdBy is null or p.createdBy = '')")
-            ->setParameter('start', CarbonImmutable::now()->startOfDay())
-            ->setParameter('end', CarbonImmutable::now()->endOfDay())
+            ->setParameter('start', $startOfDay)
+            ->setParameter('end', $endOfDay)
             ->getQuery()
             ->toIterable()
         ;
+
+        // 收集所有需要处理的sessionId
+        $sessionIds = [];
+        $itemsToUpdate = [];
 
         foreach ($log as $item) {
             if (!$item instanceof PageVisitLog) {
                 continue;
             }
 
-            $output->writeln((string) $item->getId());
-            $res = $this->pageVisitLogRepository->createQueryBuilder('p')
-                ->where('p.sessionId = :sessionId and p.createdBy is not null')
-                ->setParameter('sessionId', $item->getSessionId())
-                ->setMaxResults(1)
-                ->getQuery()
-                ->getOneOrNullResult()
-            ;
-            if (null === $res) {
-                continue;
-            }
+            $sessionIds[] = $item->getSessionId();
+            $itemsToUpdate[] = $item;
+        }
 
-            if ($res instanceof PageVisitLog) {
-                $item->setCreatedBy($res->getCreatedBy());
+        if ($sessionIds === []) {
+            return Command::SUCCESS;
+        }
+
+        // 批量查询所有有createdBy的记录，按sessionId分组
+        $sessionToUserMap = [];
+        $referenceLogs = $this->pageVisitLogRepository->createQueryBuilder('p')
+            ->select('p.sessionId', 'p.createdBy')
+            ->where('p.sessionId IN (:sessionIds)')
+            ->andWhere('p.createdBy IS NOT NULL')
+            ->andWhere('p.createdBy != :emptyCreatedBy')
+            ->setParameter('sessionIds', array_unique($sessionIds))
+            ->setParameter('emptyCreatedBy', '')
+            ->groupBy('p.sessionId', 'p.createdBy')
+            ->getQuery()
+            ->getResult()
+        ;
+
+        foreach ($referenceLogs as $referenceLog) {
+            $sessionToUserMap[$referenceLog['sessionId']] = $referenceLog['createdBy'];
+        }
+
+        // 批量更新记录
+        $updatedCount = 0;
+        foreach ($itemsToUpdate as $item) {
+            $sessionId = $item->getSessionId();
+
+            if (isset($sessionToUserMap[$sessionId])) {
+                $output->writeln((string) $item->getId());
+                $item->setCreatedBy($sessionToUserMap[$sessionId]);
                 $this->entityManager->persist($item);
-                $this->entityManager->flush();
+                $updatedCount++;
             }
+        }
+
+        // 只在最后flush一次
+        if ($updatedCount > 0) {
+            $this->entityManager->flush();
+            $output->writeln("Updated {$updatedCount} records.");
         }
 
         return Command::SUCCESS;
