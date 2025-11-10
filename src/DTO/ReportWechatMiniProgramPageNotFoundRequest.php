@@ -19,12 +19,15 @@ class ReportWechatMiniProgramPageNotFoundRequest
     public function __construct(
         #[Assert\NotBlank]
         #[Assert\Type('array')]
+        /** @param array<string, mixed> $error */
         public readonly array $error,
 
         #[Assert\Type('array')]
+        /** @var array<string, mixed>|null */
         public readonly ?array $launchOptions = null,
 
         #[Assert\Type('array')]
+        /** @var array<string, mixed>|null */
         public readonly ?array $enterOptions = null,
     ) {
     }

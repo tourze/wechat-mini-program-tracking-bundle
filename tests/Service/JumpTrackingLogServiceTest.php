@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace WechatMiniProgramTrackingBundle\Tests\Service;
 
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -28,7 +27,6 @@ interface TestUserInterface extends UserInterface
  * @internal
  */
 #[CoversClass(JumpTrackingLogService::class)]
-#[RunTestsInSeparateProcesses]
 final class JumpTrackingLogServiceTest extends TestCase
 {
     private JumpTrackingLogService $service;

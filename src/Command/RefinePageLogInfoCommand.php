@@ -62,6 +62,7 @@ class RefinePageLogInfoCommand extends Command
 
         // 批量查询所有有createdBy的记录，按sessionId分组
         $sessionToUserMap = [];
+        /** @var array<array{sessionId: string|null, createdBy: string|null}> $referenceLogs */
         $referenceLogs = $this->pageVisitLogRepository->createQueryBuilder('p')
             ->select('p.sessionId', 'p.createdBy')
             ->where('p.sessionId IN (:sessionIds)')

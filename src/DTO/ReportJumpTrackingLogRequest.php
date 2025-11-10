@@ -42,6 +42,7 @@ class ReportJumpTrackingLogRequest
     #[Assert\Length(max: 255)]
     public ?string $eventName = null;
 
+    /** @var array<string, mixed>|null */
     #[Assert\Valid]
     public ?array $eventParam = null;
 
@@ -94,32 +95,128 @@ class ReportJumpTrackingLogRequest
     {
         $request = new self();
 
-        $request->currentPath = $procedure->currentPath ?? null;
-        $request->jumpResult = $procedure->jumpResult ?? false;
-        $request->deviceBrand = $procedure->deviceBrand ?? null;
-        $request->deviceId = $procedure->deviceId ?? null;
-        $request->deviceModel = $procedure->deviceModel ?? null;
-        $request->deviceScreenHeight = $procedure->deviceScreenHeight ?? null;
-        $request->deviceScreenWidth = $procedure->deviceScreenWidth ?? null;
-        $request->deviceSystem = $procedure->deviceSystem ?? null;
-        $request->deviceSystemVersion = $procedure->deviceSystemVersion ?? null;
-        $request->eventName = $procedure->eventName ?? null;
-        $request->eventParam = $procedure->eventParam ?? null;
-        $request->networkType = $procedure->networkType ?? null;
-        $request->pageName = $procedure->pageName ?? null;
-        $request->pageQuery = $procedure->pageQuery ?? null;
-        $request->pageTitle = $procedure->pageTitle ?? null;
-        $request->pageUrl = $procedure->pageUrl ?? null;
-        $request->platform = $procedure->platform ?? null;
-        $request->prevPath = $procedure->prevPath ?? null;
-        $request->prevSessionId = $procedure->prevSessionId ?? null;
-        $request->scene = $procedure->scene ?? null;
-        $request->sdkName = $procedure->sdkName ?? null;
-        $request->sdkType = $procedure->sdkType ?? null;
-        $request->sdkVersion = $procedure->sdkVersion ?? null;
-        $request->sessionId = $procedure->sessionId ?? null;
+        self::mapProcedureProperties($procedure, $request);
 
         return $request;
+    }
+
+    /**
+     * 将 Procedure 属性映射到 DTO
+     */
+    private static function mapProcedureProperties(object $procedure, self $request): void
+    {
+        self::mapDeviceProperties($procedure, $request);
+        self::mapEventProperties($procedure, $request);
+        self::mapPageProperties($procedure, $request);
+        self::mapSessionProperties($procedure, $request);
+        self::mapSdkProperties($procedure, $request);
+    }
+
+    /**
+     * 映射设备相关属性
+     */
+    private static function mapDeviceProperties(object $procedure, self $request): void
+    {
+        if (property_exists($procedure, 'deviceBrand')) {
+            $request->deviceBrand = $procedure->deviceBrand;
+        }
+        if (property_exists($procedure, 'deviceId')) {
+            $request->deviceId = $procedure->deviceId;
+        }
+        if (property_exists($procedure, 'deviceModel')) {
+            $request->deviceModel = $procedure->deviceModel;
+        }
+        if (property_exists($procedure, 'deviceScreenHeight')) {
+            $request->deviceScreenHeight = $procedure->deviceScreenHeight;
+        }
+        if (property_exists($procedure, 'deviceScreenWidth')) {
+            $request->deviceScreenWidth = $procedure->deviceScreenWidth;
+        }
+        if (property_exists($procedure, 'deviceSystem')) {
+            $request->deviceSystem = $procedure->deviceSystem;
+        }
+        if (property_exists($procedure, 'deviceSystemVersion')) {
+            $request->deviceSystemVersion = $procedure->deviceSystemVersion;
+        }
+        if (property_exists($procedure, 'networkType')) {
+            $request->networkType = $procedure->networkType;
+        }
+    }
+
+    /**
+     * 映射事件相关属性
+     */
+    private static function mapEventProperties(object $procedure, self $request): void
+    {
+        if (property_exists($procedure, 'eventName')) {
+            $request->eventName = $procedure->eventName;
+        }
+        if (property_exists($procedure, 'eventParam')) {
+            $request->eventParam = $procedure->eventParam;
+        }
+    }
+
+    /**
+     * 映射页面相关属性
+     */
+    private static function mapPageProperties(object $procedure, self $request): void
+    {
+        if (property_exists($procedure, 'currentPath')) {
+            $request->currentPath = $procedure->currentPath;
+        }
+        if (property_exists($procedure, 'jumpResult')) {
+            $request->jumpResult = $procedure->jumpResult ?? false;
+        }
+        if (property_exists($procedure, 'pageName')) {
+            $request->pageName = $procedure->pageName;
+        }
+        if (property_exists($procedure, 'pageQuery')) {
+            $request->pageQuery = $procedure->pageQuery;
+        }
+        if (property_exists($procedure, 'pageTitle')) {
+            $request->pageTitle = $procedure->pageTitle;
+        }
+        if (property_exists($procedure, 'pageUrl')) {
+            $request->pageUrl = $procedure->pageUrl;
+        }
+        if (property_exists($procedure, 'platform')) {
+            $request->platform = $procedure->platform;
+        }
+        if (property_exists($procedure, 'prevPath')) {
+            $request->prevPath = $procedure->prevPath;
+        }
+        if (property_exists($procedure, 'scene')) {
+            $request->scene = $procedure->scene;
+        }
+    }
+
+    /**
+     * 映射会话相关属性
+     */
+    private static function mapSessionProperties(object $procedure, self $request): void
+    {
+        if (property_exists($procedure, 'sessionId')) {
+            $request->sessionId = $procedure->sessionId;
+        }
+        if (property_exists($procedure, 'prevSessionId')) {
+            $request->prevSessionId = $procedure->prevSessionId;
+        }
+    }
+
+    /**
+     * 映射 SDK 相关属性
+     */
+    private static function mapSdkProperties(object $procedure, self $request): void
+    {
+        if (property_exists($procedure, 'sdkName')) {
+            $request->sdkName = $procedure->sdkName;
+        }
+        if (property_exists($procedure, 'sdkType')) {
+            $request->sdkType = $procedure->sdkType;
+        }
+        if (property_exists($procedure, 'sdkVersion')) {
+            $request->sdkVersion = $procedure->sdkVersion;
+        }
     }
 
     /**

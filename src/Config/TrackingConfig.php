@@ -16,9 +16,13 @@ class TrackingConfig
     public function __construct(
         ?string $notFoundFallbackPage = null
     ) {
-        $this->notFoundFallbackPage = $notFoundFallbackPage ??
-            $_ENV['WECHAT_MINI_PROGRAM_NOT_FOUND_FALLBACK_PAGE'] ??
-            'pages' . DIRECTORY_SEPARATOR . 'index' . DIRECTORY_SEPARATOR . 'index?_from=page_not_found';
+        if ($notFoundFallbackPage !== null) {
+            $this->notFoundFallbackPage = $notFoundFallbackPage;
+        } elseif (isset($_ENV['WECHAT_MINI_PROGRAM_NOT_FOUND_FALLBACK_PAGE']) && is_string($_ENV['WECHAT_MINI_PROGRAM_NOT_FOUND_FALLBACK_PAGE'])) {
+            $this->notFoundFallbackPage = $_ENV['WECHAT_MINI_PROGRAM_NOT_FOUND_FALLBACK_PAGE'];
+        } else {
+            $this->notFoundFallbackPage = 'pages' . DIRECTORY_SEPARATOR . 'index' . DIRECTORY_SEPARATOR . 'index?_from=page_not_found';
+        }
     }
 
     /**

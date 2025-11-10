@@ -6,7 +6,6 @@ namespace WechatMiniProgramTrackingBundle\Tests\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
 use WechatMiniProgramTrackingBundle\Config\TrackingConfig;
 use WechatMiniProgramTrackingBundle\DTO\ReportWechatMiniProgramPageNotFoundRequest;
@@ -18,7 +17,6 @@ use WechatMiniProgramTrackingBundle\Service\PageNotFoundLogService;
  * @internal
  */
 #[CoversClass(PageNotFoundLogService::class)]
-#[RunTestsInSeparateProcesses]
 final class PageNotFoundLogServiceTest extends TestCase
 {
     private PageNotFoundLogService $service;
