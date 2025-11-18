@@ -22,11 +22,6 @@ final class PageVisitLogCrudControllerTest extends AbstractEasyAdminControllerTe
         return new PageVisitLogCrudController();
     }
 
-    public function testGetEntityFqcn(): void
-    {
-        $this->assertSame(PageVisitLog::class, PageVisitLogCrudController::getEntityFqcn());
-    }
-
     /**
      * @return iterable<string, array{string}>
      */

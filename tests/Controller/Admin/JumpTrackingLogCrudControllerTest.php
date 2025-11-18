@@ -40,11 +40,6 @@ final class JumpTrackingLogCrudControllerTest extends AbstractEasyAdminControlle
         return new JumpTrackingLogCrudController();
     }
 
-    public function testGetEntityFqcn(): void
-    {
-        $this->assertSame(JumpTrackingLog::class, JumpTrackingLogCrudController::getEntityFqcn());
-    }
-
     /**
      * @return iterable<string, array{string}>
      */

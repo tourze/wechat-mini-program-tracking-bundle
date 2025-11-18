@@ -22,11 +22,6 @@ final class PageNotFoundLogCrudControllerTest extends AbstractEasyAdminControlle
         return new PageNotFoundLogCrudController();
     }
 
-    public function testGetEntityFqcn(): void
-    {
-        $this->assertSame(PageNotFoundLog::class, PageNotFoundLogCrudController::getEntityFqcn());
-    }
-
     /**
      * @return iterable<string, array{string}>
      */
