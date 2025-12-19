@@ -6,13 +6,14 @@ namespace WechatMiniProgramTrackingBundle\Procedure;
 
 use Tourze\JsonRPC\Core\Attribute\MethodDoc;
 use Tourze\JsonRPC\Core\Attribute\MethodExpose;
-use Tourze\JsonRPC\Core\Attribute\MethodParam;
 use Tourze\JsonRPC\Core\Attribute\MethodTag;
+use Tourze\JsonRPC\Core\Contracts\RpcParamInterface;
+use Tourze\JsonRPC\Core\Result\ArrayResult;
 use Tourze\JsonRPCLockBundle\Procedure\LockableProcedure;
 use Tourze\JsonRPCLogBundle\Attribute\Log;
-use WechatMiniProgramBundle\Procedure\LaunchOptionsAware;
 use WechatMiniProgramTrackingBundle\DTO\ReportWechatMiniProgramPageNotFoundRequest;
 use WechatMiniProgramTrackingBundle\DTO\ReportWechatMiniProgramPageNotFoundResponse;
+use WechatMiniProgramTrackingBundle\Param\ReportWechatMiniProgramPageNotFoundParam;
 use WechatMiniProgramTrackingBundle\Service\PageNotFoundLogService;
 
 #[MethodTag(name: '微信小程序')]
@@ -21,37 +22,29 @@ use WechatMiniProgramTrackingBundle\Service\PageNotFoundLogService;
 #[Log]
 class ReportWechatMiniProgramPageNotFound extends LockableProcedure
 {
-    use LaunchOptionsAware;
-
-    /**
-     * @var array<string, mixed>
-     */
-    #[MethodParam(description: '错误信息')]
-    public array $error;
-
     public function __construct(
         private readonly PageNotFoundLogService $pageNotFoundLogService,
     ) {
     }
 
     /**
-     * @return array<string, mixed>
+     * @phpstan-param ReportWechatMiniProgramPageNotFoundParam $param
      */
-    public function execute(): array
+    public function execute(ReportWechatMiniProgramPageNotFoundParam|RpcParamInterface $param): ArrayResult
     {
         try {
             // 创建请求 DTO
-            $request = ReportWechatMiniProgramPageNotFoundRequest::fromProcedure($this);
+            $request = ReportWechatMiniProgramPageNotFoundRequest::fromProcedure($param);
 
             // 委托给服务层处理
             $response = $this->pageNotFoundLogService->handleReport($request);
 
             // 返回向后兼容的格式
-            return $response->toLegacyArray();
+            return new ArrayResult($response->toLegacyArray());
         } catch (\Exception $e) {
-            // 异常处理，确保返回格式一致
+            // 异常处理,确保返回格式一致
             $currentTime = time();
-            return ReportWechatMiniProgramPageNotFoundResponse::failure($currentTime, $e->getMessage())->toLegacyArray();
+            return new ArrayResult(ReportWechatMiniProgramPageNotFoundResponse::failure($currentTime, $e->getMessage())->toLegacyArray());
         }
     }
 }

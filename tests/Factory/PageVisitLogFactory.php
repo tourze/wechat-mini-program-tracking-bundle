@@ -12,6 +12,7 @@ final class PageVisitLogFactory
 {
     /**
      * 创建基础测试数据
+     * @return array<string, mixed>
      */
     public static function createBasicData(): array
     {
@@ -29,6 +30,7 @@ final class PageVisitLogFactory
 
     /**
      * 创建带 null 字段的测试数据
+     * @return array<string, mixed>
      */
     public static function createWithNullFields(): array
     {
@@ -39,13 +41,14 @@ final class PageVisitLogFactory
             'sessionId' => 'null-session-' . $uniqueId,
             'createdBy' => null,
             'query' => null,
-            'createTime' => null,
+            'createTime' => null, // 这个应该是null来匹配测试期望
             'createdFromIp' => null,
         ];
     }
 
     /**
      * 创建复杂查询测试数据
+     * @return array<string, mixed>
      */
     public static function createForComplexQuery(): array
     {
@@ -63,6 +66,7 @@ final class PageVisitLogFactory
 
     /**
      * 创建多个相似实体的数据（用于批量测试）
+     * @return array<int, array<string, mixed>>
      */
     public static function createMultipleData(int $count = 5): array
     {
@@ -85,6 +89,7 @@ final class PageVisitLogFactory
 
     /**
      * 创建日期范围测试数据
+     * @return array<int, array<string, mixed>>
      */
     public static function createDateRangeData(): array
     {
@@ -121,6 +126,7 @@ final class PageVisitLogFactory
 
     /**
      * 创建会话修复场景测试数据（模拟 RefinePageLogInfoCommand 使用场景）
+     * @return array<int, array<string, mixed>>
      */
     public static function createSessionFixData(): array
     {
@@ -149,6 +155,7 @@ final class PageVisitLogFactory
 
     /**
      * 创建大数据集测试数据
+     * @return array<int, array<string, mixed>>
      */
     public static function createLargeDataset(int $count = 50): array
     {
@@ -168,6 +175,7 @@ final class PageVisitLogFactory
 
     /**
      * 创建 nullable 字段组合测试数据
+     * @return array<int, array<string, mixed>>
      */
     public static function createNullableCombinations(): array
     {
@@ -178,7 +186,7 @@ final class PageVisitLogFactory
                 'sessionId' => 'all-null-session',
                 'createdBy' => null,
                 'query' => null,
-                'createTime' => null,
+                'createTime' => null, // 这个应该是null来匹配测试期望
                 'createdFromIp' => null,
             ],
             [
@@ -187,7 +195,7 @@ final class PageVisitLogFactory
                 'sessionId' => 'partial-null-session',
                 'createdBy' => 'test-user-2',
                 'query' => null,
-                'createTime' => new \DateTimeImmutable(),
+                'createTime' => null, // 这个应该是null来匹配测试期望
                 'createdFromIp' => null,
             ],
             [
@@ -196,7 +204,7 @@ final class PageVisitLogFactory
                 'sessionId' => 'mixed-null-session',
                 'createdBy' => null,
                 'query' => ['key' => 'value'],
-                'createTime' => null,
+                'createTime' => new \DateTimeImmutable(), // 这个有值
                 'createdFromIp' => '192.168.1.1',
             ],
         ];
@@ -204,6 +212,7 @@ final class PageVisitLogFactory
 
     /**
      * 自定义数据提供器 - 基础CRUD测试
+     * @return array<string, array{array<string, mixed>}>
      */
     public static function basicCrudProvider(): array
     {
@@ -215,6 +224,7 @@ final class PageVisitLogFactory
 
     /**
      * 自定义数据提供器 - 查找测试
+     * @return array<string, array{array<string, mixed>, array<string, mixed>}>
      */
     public static function findByProvider(): array
     {
@@ -241,6 +251,7 @@ final class PageVisitLogFactory
 
     /**
      * 自定义数据提供器 - 多条件查找测试
+     * @return array<string, array{array<string, mixed>, array<string, mixed>}>
      */
     public static function multipleCriteriaProvider(): array
     {

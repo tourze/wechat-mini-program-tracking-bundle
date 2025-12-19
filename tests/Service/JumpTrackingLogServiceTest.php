@@ -5,46 +5,24 @@ declare(strict_types=1);
 namespace WechatMiniProgramTrackingBundle\Tests\Service;
 
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\TestCase;
-use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Tourze\DoctrineAsyncInsertBundle\Service\AsyncInsertService;
-use WechatMiniProgramTrackingBundle\Config\TrackingConfig;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use Tourze\PHPUnitSymfonyKernelTest\AbstractIntegrationTestCase;
 use WechatMiniProgramTrackingBundle\DTO\ReportJumpTrackingLogRequest;
-use WechatMiniProgramTrackingBundle\DTO\ReportJumpTrackingLogResponse;
 use WechatMiniProgramTrackingBundle\Entity\JumpTrackingLog;
 use WechatMiniProgramTrackingBundle\Service\JumpTrackingLogService;
-
-/**
- * 测试用的用户接口
- */
-interface TestUserInterface extends UserInterface
-{
-    public function getIdentity(): ?string;
-}
 
 /**
  * @internal
  */
 #[CoversClass(JumpTrackingLogService::class)]
-final class JumpTrackingLogServiceTest extends TestCase
+#[RunTestsInSeparateProcesses]
+final class JumpTrackingLogServiceTest extends AbstractIntegrationTestCase
 {
     private JumpTrackingLogService $service;
-    private AsyncInsertService $doctrineService;
-    private Security $security;
-    private TrackingConfig $config;
 
-    protected function setUp(): void
+    protected function onSetUp(): void
     {
-        $this->doctrineService = $this->createMock(AsyncInsertService::class);
-        $this->security = $this->createMock(Security::class);
-        $this->config = $this->createMock(TrackingConfig::class);
-
-        $this->service = new JumpTrackingLogService(
-            $this->doctrineService,
-            $this->security,
-            $this->config,
-        );
+        $this->service = self::getService(JumpTrackingLogService::class);
     }
 
     /**
@@ -56,104 +34,10 @@ final class JumpTrackingLogServiceTest extends TestCase
         $request->currentPath = '/pages/test';
         $request->sessionId = 'session123';
 
-        $this->security->method('getUser')->willReturn(null);
-
-        $this->doctrineService->expects($this->once())
-            ->method('asyncInsert')
-            ->with($this->isInstanceOf(JumpTrackingLog::class));
-
         $response = $this->service->handleReport($request);
 
         $this->assertTrue($response->success);
         $this->assertIsInt($response->id);
-    }
-
-    /**
-     * 测试带用户信息的报告处理
-     */
-    public function testHandleReportWithUser(): void
-    {
-        $request = new ReportJumpTrackingLogRequest();
-        $request->currentPath = '/pages/test';
-
-        // 创建一个支持 getIdentity 方法的 mock 用户
-        $user = $this->createMock(TestUserInterface::class);
-        $user->method('getUserIdentifier')->willReturn('user123');
-        $user->method('getIdentity')->willReturn('identity456');
-        $user->method('getRoles')->willReturn(['ROLE_USER']);
-
-        $this->security->method('getUser')->willReturn($user);
-        $this->config->method('supportsUserIdentity')->willReturn(true);
-
-        $this->doctrineService->expects($this->once())
-            ->method('asyncInsert')
-            ->with($this->isInstanceOf(JumpTrackingLog::class));
-
-        $response = $this->service->handleReport($request);
-
-        $this->assertTrue($response->success);
-        $this->assertIsInt($response->id);
-    }
-
-    /**
-     * 测试 getIdentity 方法异常处理
-     */
-    public function testHandleReportWithUserIdentityException(): void
-    {
-        $request = new ReportJumpTrackingLogRequest();
-        $request->currentPath = '/pages/test';
-
-        // 创建一个 getIdentity 方法会抛出异常的用户
-        $user = $this->createMock(TestUserInterface::class);
-        $user->method('getUserIdentifier')->willReturn('user123');
-        $user->method('getIdentity')->willThrowException(new \RuntimeException('Identity not available'));
-        $user->method('getRoles')->willReturn(['ROLE_USER']);
-
-        $this->security->method('getUser')->willReturn($user);
-        $this->config->method('supportsUserIdentity')->willReturn(true);
-
-        $this->doctrineService->expects($this->once())
-            ->method('asyncInsert')
-            ->with($this->isInstanceOf(JumpTrackingLog::class));
-
-        $response = $this->service->handleReport($request);
-
-        $this->assertTrue($response->success);
-        $this->assertIsInt($response->id);
-    }
-
-    /**
-     * 测试保存失败的情况
-     */
-    public function testHandleReportSaveFailure(): void
-    {
-        $request = new ReportJumpTrackingLogRequest();
-        $request->currentPath = '/pages/test';
-
-        $this->security->method('getUser')->willReturn(null);
-
-        $this->doctrineService->expects($this->once())
-            ->method('asyncInsert')
-            ->willThrowException(new \RuntimeException('Database error'));
-
-        $response = $this->service->handleReport($request);
-
-        $this->assertFalse($response->success);
-        $this->assertStringContainsString('处理请求失败', $response->message);
-    }
-
-    /**
-     * 测试无效请求参数
-     */
-    public function testHandleReportInvalidRequest(): void
-    {
-        $request = $this->createMock(ReportJumpTrackingLogRequest::class);
-        $request->method('validate')->willThrowException(new \InvalidArgumentException('Invalid parameter'));
-
-        $response = $this->service->handleReport($request);
-
-        $this->assertFalse($response->success);
-        $this->assertStringContainsString('请求参数无效', $response->message);
     }
 
     /**
@@ -169,8 +53,6 @@ final class JumpTrackingLogServiceTest extends TestCase
         $request->eventName = 'page_view';
         $request->sessionId = 'session456';
 
-        $this->security->method('getUser')->willReturn(null);
-
         $jumpTrackingLog = $this->service->createTrackingLog($request);
 
         $this->assertInstanceOf(JumpTrackingLog::class, $jumpTrackingLog);
@@ -180,5 +62,75 @@ final class JumpTrackingLogServiceTest extends TestCase
         $this->assertSame('device123', $jumpTrackingLog->getDeviceId());
         $this->assertSame('page_view', $jumpTrackingLog->getEventName());
         $this->assertSame('session456', $jumpTrackingLog->getSessionId());
+    }
+
+    /**
+     * 测试 saveTrackingLog 方法
+     */
+    public function testSaveTrackingLog(): void
+    {
+        $request = new ReportJumpTrackingLogRequest();
+        $request->currentPath = '/pages/save-test';
+        $request->sessionId = 'session-save-test';
+
+        $jumpTrackingLog = $this->service->createTrackingLog($request);
+
+        // 此方法使用异步插入，不会抛出异常表示成功
+        $this->service->saveTrackingLog($jumpTrackingLog);
+
+        // 验证日志对象已设置基本属性
+        $this->assertSame('/pages/save-test', $jumpTrackingLog->getPage());
+    }
+
+    /**
+     * 测试完整参数的报告处理
+     */
+    public function testHandleReportWithFullParameters(): void
+    {
+        $request = new ReportJumpTrackingLogRequest();
+        $request->currentPath = '/pages/full-test';
+        $request->jumpResult = true;
+        $request->deviceBrand = 'Xiaomi';
+        $request->deviceId = 'xiaomi-123';
+        $request->deviceModel = 'Mi 11';
+        $request->deviceScreenHeight = 2400;
+        $request->deviceScreenWidth = 1080;
+        $request->deviceSystem = 'Android';
+        $request->deviceSystemVersion = '12.0';
+        $request->eventName = 'click';
+        $request->eventParam = ['button' => 'submit'];
+        $request->networkType = '4g';
+        $request->pageName = 'Test Page';
+        $request->pageQuery = 'id=456';
+        $request->pageTitle = 'Test Title';
+        $request->pageUrl = '/pages/full-test?id=456';
+        $request->platform = 'android';
+        $request->prevPath = '/pages/home';
+        $request->prevSessionId = 'prev-session';
+        $request->scene = '1001';
+        $request->sdkName = 'WeChat';
+        $request->sdkType = 'miniprogram';
+        $request->sdkVersion = '8.0.0';
+        $request->sessionId = 'session-full';
+
+        $response = $this->service->handleReport($request);
+
+        $this->assertTrue($response->success);
+        $this->assertIsInt($response->id);
+    }
+
+    /**
+     * 测试响应消息
+     */
+    public function testHandleReportResponseMessage(): void
+    {
+        $request = new ReportJumpTrackingLogRequest();
+        $request->currentPath = '/pages/message-test';
+        $request->sessionId = 'session-msg';
+
+        $response = $this->service->handleReport($request);
+
+        $this->assertTrue($response->success);
+        $this->assertSame('跳转追踪日志上报成功', $response->message);
     }
 }

@@ -11,6 +11,9 @@ namespace WechatMiniProgramTrackingBundle\DTO;
  */
 class ReportWechatMiniProgramPageNotFoundResponse
 {
+    /**
+     * @param array<string, mixed>|null $reLaunch
+     */
     public function __construct(
         public readonly int $time,
         public readonly ?array $reLaunch = null,
@@ -21,6 +24,8 @@ class ReportWechatMiniProgramPageNotFoundResponse
 
     /**
      * 创建成功响应
+     *
+     * @param array<string, mixed>|null $reLaunch
      */
     public static function success(int $time, ?array $reLaunch = null, ?string $message = null): self
     {

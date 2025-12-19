@@ -3,6 +3,7 @@ services:
   _defaults:
     autowire: true      # Automatically injects dependencies in your services.
     autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+    public: false
 
   # Cache interface configuration
   Psr\SimpleCache\CacheInterface:
@@ -13,17 +14,16 @@ services:
     arguments:
       $notFoundFallbackPage: '%env(default::null:WECHAT_MINI_PROGRAM_NOT_FOUND_FALLBACK_PAGE)%'
 
-  WechatMiniProgramTrackingBundle\Command\:
-    resource: '../../Command/'
   WechatMiniProgramTrackingBundle\Controller\:
     resource: '../../Controller/'
-  WechatMiniProgramTrackingBundle\EventSubscriber\:
-    resource: '../../EventSubscriber/'
-  WechatMiniProgramTrackingBundle\Logger\:
-    resource: '../../Logger/'
-  WechatMiniProgramTrackingBundle\Procedure\:
-    resource: '../../Procedure/'
   WechatMiniProgramTrackingBundle\Repository\:
     resource: '../../Repository/'
   WechatMiniProgramTrackingBundle\Service\:
     resource: '../../Service/'
+    public: true
+  WechatMiniProgramTrackingBundle\Procedure\:
+    resource: '../../Procedure/'
+  WechatMiniProgramTrackingBundle\Logger\:
+    resource: '../../Logger/'
+  WechatMiniProgramTrackingBundle\Command\:
+    resource: '../../Command/'

@@ -13,7 +13,7 @@ use WechatMiniProgramTrackingBundle\Entity\JumpTrackingLog;
  * @extends ServiceEntityRepository<JumpTrackingLog>
  */
 #[AsRepository(entityClass: JumpTrackingLog::class)]
-class JumpTrackingLogRepository extends ServiceEntityRepository
+final class JumpTrackingLogRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {

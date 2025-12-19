@@ -6,6 +6,7 @@ namespace WechatMiniProgramTrackingBundle\Service;
 
 use Symfony\Bundle\SecurityBundle\Security;
 use Tourze\DoctrineAsyncInsertBundle\Service\AsyncInsertService as DoctrineService;
+use Tourze\UserServiceContracts\UserManagerInterface;
 use WechatMiniProgramTrackingBundle\Config\TrackingConfig;
 use WechatMiniProgramTrackingBundle\DTO\ReportJumpTrackingLogRequest;
 use WechatMiniProgramTrackingBundle\DTO\ReportJumpTrackingLogResponse;
@@ -22,6 +23,7 @@ class JumpTrackingLogService
         private readonly DoctrineService $doctrineService,
         private readonly Security $security,
         private readonly TrackingConfig $config,
+        private readonly UserManagerInterface $userManager,
     ) {
     }
 
@@ -98,12 +100,18 @@ class JumpTrackingLogService
 
         $jumpTrackingLog->setOpenId($user->getUserIdentifier());
 
-        // 检查是否支持 getIdentity() 方法
-        if ($this->config->supportsUserIdentity() && method_exists($user, 'getIdentity')) {
+        // 使用 UserManagerInterface 获取用户身份信息
+        if ($this->config->supportsUserIdentity()) {
             try {
-                $identity = $user->getIdentity();
-                if ($identity !== null) {
-                    $jumpTrackingLog->setUnionId($identity);
+                // 通过 UserManagerInterface 获取完整的用户信息
+                $userIdentifier = $user->getUserIdentifier();
+                $fullUser = $this->userManager->loadUserByIdentifier($userIdentifier);
+
+                if ($fullUser !== null && method_exists($fullUser, 'getIdentity')) {
+                    $identity = $fullUser->getIdentity();
+                    if ($identity !== null) {
+                        $jumpTrackingLog->setUnionId($identity);
+                    }
                 }
             } catch (\Exception $e) {
                 // 记录错误但不中断流程

@@ -43,7 +43,8 @@ class PageNotFoundLogService
             $log->setRawError($rawError);
         } catch (\Exception $e) {
             // 如果 JSON 编码失败，使用字符串表示
-            $log->setRawError(json_encode(['error' => 'Failed to encode error data', 'original' => (string) $e]));
+            $rawError = json_encode(['error' => 'Failed to encode error data', 'original' => (string) $e]);
+            $log->setRawError($rawError === false ? 'Failed to encode error data' : $rawError);
         }
 
         // 设置启动选项

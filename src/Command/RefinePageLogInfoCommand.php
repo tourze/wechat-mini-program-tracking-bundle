@@ -16,7 +16,7 @@ use WechatMiniProgramTrackingBundle\Repository\PageVisitLogRepository;
 
 #[AsCronTask(expression: '*/10 * * * *')]
 #[AsCommand(name: self::NAME, description: '定期修正页面访问日志的创建人信息')]
-class RefinePageLogInfoCommand extends Command
+final class RefinePageLogInfoCommand extends Command
 {
     public const NAME = 'wechat-mini-program:refine-page-log-info';
 

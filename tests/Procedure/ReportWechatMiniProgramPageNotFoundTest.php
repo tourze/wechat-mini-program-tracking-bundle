@@ -4,10 +4,10 @@ namespace WechatMiniProgramTrackingBundle\Tests\Procedure;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
-use Tourze\JsonRPC\Core\Tests\AbstractProcedureTestCase;
-use WechatMiniProgramTrackingBundle\Procedure\ReportWechatMiniProgramPageNotFound;
-use WechatMiniProgramTrackingBundle\DTO\ReportWechatMiniProgramPageNotFoundRequest;
+use Tourze\PHPUnitJsonRPC\AbstractProcedureTestCase;
 use WechatMiniProgramTrackingBundle\DTO\ReportWechatMiniProgramPageNotFoundResponse;
+use WechatMiniProgramTrackingBundle\Param\ReportWechatMiniProgramPageNotFoundParam;
+use WechatMiniProgramTrackingBundle\Procedure\ReportWechatMiniProgramPageNotFound;
 
 /**
  * @internal
@@ -37,24 +37,23 @@ final class ReportWechatMiniProgramPageNotFoundTest extends AbstractProcedureTes
     {
         $procedure = self::getService(ReportWechatMiniProgramPageNotFound::class);
 
-        // 设置错误信息
-        $procedure->error = [
-            'path' => 'pages/not-exist/index',
-            'openType' => 'navigateTo',
-            'query' => ['param1' => 'value1'],
-        ];
+        $param = new ReportWechatMiniProgramPageNotFoundParam(
+            error: [
+                'path' => 'pages/not-exist/index',
+                'openType' => 'navigateTo',
+                'query' => ['param1' => 'value1'],
+            ],
+            launchOptions: ['scene' => 1001],
+            enterOptions: ['from' => 'test']
+        );
 
-        // 设置启动选项
-        $procedure->setLaunchOptions(['scene' => 1001]);
-        $procedure->setEnterOptions(['from' => 'test']);
-
-        $result = $procedure->execute();
+        $result = $procedure->execute($param);
 
         // 验证返回结果包含时间戳
         $this->assertArrayHasKey('time', $result);
         $this->assertIsInt($result['time']);
 
-        // 验证没有重启操作（因为不是appLaunch）
+        // 验证没有重启操作(因为不是appLaunch)
         $this->assertArrayNotHasKey('__reLaunch', $result);
     }
 
@@ -65,17 +64,17 @@ final class ReportWechatMiniProgramPageNotFoundTest extends AbstractProcedureTes
     {
         $procedure = self::getService(ReportWechatMiniProgramPageNotFound::class);
 
-        // 设置app启动时的错误信息
-        $procedure->error = [
-            'path' => 'pages/not-exist/index',
-            'openType' => 'appLaunch',
-            'query' => [],
-        ];
+        $param = new ReportWechatMiniProgramPageNotFoundParam(
+            error: [
+                'path' => 'pages/not-exist/index',
+                'openType' => 'appLaunch',
+                'query' => [],
+            ],
+            launchOptions: ['scene' => 1001],
+            enterOptions: ['from' => 'launch']
+        );
 
-        $procedure->setLaunchOptions(['scene' => 1001]);
-        $procedure->setEnterOptions(['from' => 'launch']);
-
-        $result = $procedure->execute();
+        $result = $procedure->execute($param);
 
         // 验证返回结果包含时间戳
         $this->assertArrayHasKey('time', $result);
@@ -98,46 +97,19 @@ final class ReportWechatMiniProgramPageNotFoundTest extends AbstractProcedureTes
     {
         $procedure = self::getService(ReportWechatMiniProgramPageNotFound::class);
 
-        // 设置正常的错误信息，测试正常流程
-        $procedure->error = [
-            'path' => 'pages/test/index',
-            'openType' => 'navigateTo',
-            'query' => [],
-        ];
+        $param = new ReportWechatMiniProgramPageNotFoundParam(
+            error: [
+                'path' => 'pages/test/index',
+                'openType' => 'navigateTo',
+                'query' => [],
+            ]
+        );
 
-        $result = $procedure->execute();
+        $result = $procedure->execute($param);
 
         // 验证正常响应格式
         $this->assertArrayHasKey('time', $result);
         $this->assertIsInt($result['time']);
-    }
-
-    /**
-     * 测试 DTO 转换
-     */
-    public function testDTOTransformation(): void
-    {
-        $procedure = self::getService(ReportWechatMiniProgramPageNotFound::class);
-
-        // 设置错误信息
-        $procedure->error = [
-            'path' => 'pages/not-exist/index',
-            'openType' => 'appLaunch',
-            'query' => ['param1' => 'value1'],
-        ];
-
-        $procedure->setLaunchOptions(['scene' => 1001]);
-        $procedure->setEnterOptions(['from' => 'test']);
-
-        // 验证 DTO 可以正确创建
-        $request = ReportWechatMiniProgramPageNotFoundRequest::fromProcedure($procedure);
-
-        $this->assertSame('pages/not-exist/index', $request->getErrorPath());
-        $this->assertSame('appLaunch', $request->getErrorOpenType());
-        $this->assertSame(['param1' => 'value1'], $request->getErrorQuery());
-        $this->assertTrue($request->isAppLaunch());
-        $this->assertSame(['scene' => 1001], $request->launchOptions);
-        $this->assertSame(['from' => 'test'], $request->enterOptions);
     }
 
     /**

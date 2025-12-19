@@ -15,19 +15,18 @@ class ReportWechatMiniProgramPageNotFoundRequest
 {
     /**
      * @param array<string, mixed> $error
+     * @param array<string, mixed>|null $launchOptions
+     * @param array<string, mixed>|null $enterOptions
      */
     public function __construct(
         #[Assert\NotBlank]
-        #[Assert\Type('array')]
-        /** @param array<string, mixed> $error */
+        #[Assert\Type(type: 'array')]
         public readonly array $error,
 
-        #[Assert\Type('array')]
-        /** @var array<string, mixed>|null */
+        #[Assert\Type(type: 'array')]
         public readonly ?array $launchOptions = null,
 
-        #[Assert\Type('array')]
-        /** @var array<string, mixed>|null */
+        #[Assert\Type(type: 'array')]
         public readonly ?array $enterOptions = null,
     ) {
     }
@@ -73,10 +72,32 @@ class ReportWechatMiniProgramPageNotFoundRequest
      */
     public static function fromProcedure(object $procedure): self
     {
+        $error = [];
+        $launchOptions = null;
+        $enterOptions = null;
+
+        // 安全地获取 error 属性
+        if (property_exists($procedure, 'error')) {
+            $errorValue = $procedure->error;
+            if (is_array($errorValue)) {
+                $error = $errorValue;
+            }
+        }
+
+        // 安全地获取 launchOptions
+        if (method_exists($procedure, 'getLaunchOptions')) {
+            $launchOptions = $procedure->getLaunchOptions();
+        }
+
+        // 安全地获取 enterOptions
+        if (method_exists($procedure, 'getEnterOptions')) {
+            $enterOptions = $procedure->getEnterOptions();
+        }
+
         return new self(
-            $procedure->error ?? [],
-            method_exists($procedure, 'getLaunchOptions') ? $procedure->getLaunchOptions() : null,
-            method_exists($procedure, 'getEnterOptions') ? $procedure->getEnterOptions() : null,
+            $error,
+            $launchOptions,
+            $enterOptions,
         );
     }
 
@@ -87,7 +108,7 @@ class ReportWechatMiniProgramPageNotFoundRequest
      */
     public function validate(): void
     {
-        if (empty($this->error)) {
+        if ($this->error === []) {
             throw new \InvalidArgumentException('错误信息不能为空');
         }
 

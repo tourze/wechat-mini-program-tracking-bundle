@@ -30,11 +30,10 @@ class JumpTrackingLog implements \Stringable
         return $this->id;
     }
 
-    #[Assert\NotBlank]
     #[Assert\Length(max: 255)]
     #[IndexColumn]
-    #[ORM\Column(length: 255, options: ['comment' => '页面路径'])]
-    private string $page;
+    #[ORM\Column(length: 255, nullable: true, options: ['comment' => '页面路径'])]
+    private ?string $page = null;
 
     #[Assert\Length(max: 100)]
     #[ORM\Column(length: 100, nullable: true, options: ['comment' => 'OpenID'])]
@@ -186,12 +185,12 @@ class JumpTrackingLog implements \Stringable
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true, options: ['comment' => '创建时间'])]
     private ?\DateTimeImmutable $createTime = null;
 
-    public function getPage(): string
+    public function getPage(): ?string
     {
         return $this->page;
     }
 
-    public function setPage(string $page): void
+    public function setPage(?string $page): void
     {
         $this->page = $page;
     }

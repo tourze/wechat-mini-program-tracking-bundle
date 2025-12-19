@@ -5,6 +5,7 @@ namespace WechatMiniProgramTrackingBundle\Tests\Repository;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use PHPUnit\Framework\Attributes\TestWith;
 use Tourze\PHPUnitSymfonyKernelTest\AbstractRepositoryTestCase;
 use WechatMiniProgramTrackingBundle\Entity\PageNotFoundLog;
 use WechatMiniProgramTrackingBundle\Repository\PageNotFoundLogRepository;
@@ -27,20 +28,23 @@ final class PageNotFoundLogRepositoryTest extends AbstractRepositoryTestCase
 
     private function setUpTestServices(): void
     {
+        /** @var PageNotFoundLogRepository $repository */
         $repository = self::getContainer()->get(PageNotFoundLogRepository::class);
         $this->assertInstanceOf(PageNotFoundLogRepository::class, $repository);
         $this->repository = $repository;
     }
 
-    public function testRepositoryCanSaveAndFindEntity(): void
+    #[TestWith([['path' => 'pages/notfound/notfound', 'openId' => 'test-open-id-123', 'unionId' => 'test-union-id-123']])]
+    #[TestWith([['path' => 'pages/special/chars?query=value', 'openId' => 'special-open-id-456', 'unionId' => 'special-union-id-456']])]
+    public function testRepositoryCanSaveAndFindEntity(array $data): void
     {
         $this->setUpTestServices();
 
         // 创建实体
         $entity = new PageNotFoundLog();
-        $entity->setPath('pages/notfound/notfound');
-        $entity->setOpenId('test-open-id-123');
-        $entity->setUnionId('test-union-id-123');
+        $entity->setPath($data['path']);
+        $entity->setOpenId($data['openId']);
+        $entity->setUnionId($data['unionId']);
 
         // 保存实体
         self::getEntityManager()->persist($entity);
@@ -54,9 +58,9 @@ final class PageNotFoundLogRepositoryTest extends AbstractRepositoryTestCase
 
         $this->assertNotNull($foundEntity);
         $this->assertEquals($entity->getId(), $foundEntity->getId());
-        $this->assertEquals('pages/notfound/notfound', $foundEntity->getPath());
-        $this->assertEquals('test-open-id-123', $foundEntity->getOpenId());
-        $this->assertEquals('test-union-id-123', $foundEntity->getUnionId());
+        $this->assertEquals($data['path'], $foundEntity->getPath());
+        $this->assertEquals($data['openId'], $foundEntity->getOpenId());
+        $this->assertEquals($data['unionId'], $foundEntity->getUnionId());
     }
 
     public function testRepositoryFindAll(): void
@@ -88,7 +92,36 @@ final class PageNotFoundLogRepositoryTest extends AbstractRepositoryTestCase
         $this->assertContainsOnlyInstancesOf(PageNotFoundLog::class, $entities);
     }
 
-    public function testRepositoryFindBy(): void
+    #[TestWith([['openId' => 'same-open-id'], [
+            [
+                'path' => 'pages/error/error',
+                'openId' => 'same-open-id',
+                'unionId' => 'union-id-1',
+            ],
+            [
+                'path' => 'pages/other/other',
+                'openId' => 'same-open-id',
+                'unionId' => 'union-id-2',
+            ],
+            [
+                'path' => 'pages/different/different',
+                'openId' => 'different-open-id',
+                'unionId' => 'union-id-3',
+            ],
+        ], 2], 'find_by_openid_multiple_results')]
+    #[TestWith([['unionId' => 'union-id-1'], [
+            [
+                'path' => 'pages/error/error',
+                'openId' => 'same-open-id',
+                'unionId' => 'union-id-1',
+            ],
+            [
+                'path' => 'pages/other/other',
+                'openId' => 'same-open-id',
+                'unionId' => 'union-id-2',
+            ],
+        ], 1], 'find_by_unionid_single_result')]
+    public function testRepositoryFindBy(array $criteria, array $entityData, int $expectedCount): void
     {
         $this->setUpTestServices();
 
@@ -96,39 +129,30 @@ final class PageNotFoundLogRepositoryTest extends AbstractRepositoryTestCase
         self::getEntityManager()->createQuery('DELETE FROM ' . PageNotFoundLog::class)->execute();
 
         // 创建测试数据
-        $entity1 = new PageNotFoundLog();
-        $entity1->setPath('pages/error/error');
-        $entity1->setOpenId('same-open-id');
-        $entity1->setUnionId('union-id-1');
+        $entities = [];
+        foreach ($entityData as $data) {
+            $entity = new PageNotFoundLog();
+            $entity->setPath($data['path']);
+            $entity->setOpenId($data['openId']);
+            $entity->setUnionId($data['unionId']);
 
-        $entity2 = new PageNotFoundLog();
-        $entity2->setPath('pages/other/other');
-        $entity2->setOpenId('same-open-id');
-        $entity2->setUnionId('union-id-2');
-
-        $entity3 = new PageNotFoundLog();
-        $entity3->setPath('pages/different/different');
-        $entity3->setOpenId('different-open-id');
-        $entity3->setUnionId('union-id-3');
-
-        self::getEntityManager()->persist($entity1);
-        self::getEntityManager()->persist($entity2);
-        self::getEntityManager()->persist($entity3);
+            self::getEntityManager()->persist($entity);
+            $entities[] = $entity;
+        }
         self::getEntityManager()->flush();
 
-        // 测试根据 openId 查找
-        $entities = $this->repository->findBy(['openId' => 'same-open-id']);
+        // 测试查找
+        $foundEntities = $this->repository->findBy($criteria);
 
-        $this->assertCount(2, $entities);
-        foreach ($entities as $entity) {
-            $this->assertEquals('same-open-id', $entity->getOpenId());
+        $this->assertCount($expectedCount, $foundEntities);
+        foreach ($foundEntities as $entity) {
+            if (isset($criteria['openId'])) {
+                $this->assertEquals($criteria['openId'], $entity->getOpenId());
+            }
+            if (isset($criteria['unionId'])) {
+                $this->assertEquals($criteria['unionId'], $entity->getUnionId());
+            }
         }
-
-        // 测试根据 unionId 查找
-        $entities = $this->repository->findBy(['unionId' => 'union-id-1']);
-
-        $this->assertCount(1, $entities);
-        $this->assertEquals('union-id-1', $entities[0]->getUnionId());
     }
 
     public function testRepositoryFindOneBy(): void
@@ -356,22 +380,26 @@ final class PageNotFoundLogRepositoryTest extends AbstractRepositoryTestCase
         // 测试查找openId为null的实体
         $entitiesWithNullOpenId = $this->repository->findBy(['openId' => null]);
         $this->assertCount(1, $entitiesWithNullOpenId);
+        $this->assertArrayHasKey(0, $entitiesWithNullOpenId);
         $this->assertNull($entitiesWithNullOpenId[0]->getOpenId());
         $this->assertEquals('pages/null-test/null-test', $entitiesWithNullOpenId[0]->getPath());
 
         // 测试查找unionId为null的实体
         $entitiesWithNullUnionId = $this->repository->findBy(['unionId' => null]);
         $this->assertCount(1, $entitiesWithNullUnionId);
+        $this->assertArrayHasKey(0, $entitiesWithNullUnionId);
         $this->assertNull($entitiesWithNullUnionId[0]->getUnionId());
 
         // 测试查找openType为null的实体
         $entitiesWithNullOpenType = $this->repository->findBy(['openType' => null]);
         $this->assertCount(1, $entitiesWithNullOpenType);
+        $this->assertArrayHasKey(0, $entitiesWithNullOpenType);
         $this->assertNull($entitiesWithNullOpenType[0]->getOpenType());
 
         // 测试查找rawError为null的实体
         $entitiesWithNullRawError = $this->repository->findBy(['rawError' => null]);
         $this->assertCount(1, $entitiesWithNullRawError);
+        $this->assertArrayHasKey(0, $entitiesWithNullRawError);
         $this->assertNull($entitiesWithNullRawError[0]->getRawError());
     }
 

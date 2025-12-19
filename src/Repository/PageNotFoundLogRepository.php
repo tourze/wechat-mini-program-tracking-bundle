@@ -13,7 +13,7 @@ use WechatMiniProgramTrackingBundle\Entity\PageNotFoundLog;
  * @extends ServiceEntityRepository<PageNotFoundLog>
  */
 #[AsRepository(entityClass: PageNotFoundLog::class)]
-class PageNotFoundLogRepository extends ServiceEntityRepository
+final class PageNotFoundLogRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {

@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace WechatMiniProgramTrackingBundle\Tests\Service;
 
-use Knp\Menu\ItemInterface;
+use Knp\Menu\MenuFactory;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
-use PHPUnit\Framework\MockObject\MockObject;
-use Tourze\EasyAdminMenuBundle\Service\LinkGeneratorInterface;
 use Tourze\PHPUnitSymfonyWebTest\AbstractEasyAdminMenuTestCase;
 use WechatMiniProgramTrackingBundle\Service\AdminMenu;
 
@@ -21,57 +19,9 @@ class AdminMenuTest extends AbstractEasyAdminMenuTestCase
 {
     private AdminMenu $adminMenu;
 
-    private ItemInterface&MockObject $menuItem;
-
-    private LinkGeneratorInterface&MockObject $linkGenerator;
-
     protected function onSetUp(): void
     {
-        $this->linkGenerator = $this->createMock(LinkGeneratorInterface::class);
-        $this->linkGenerator->method('getCurdListPage')->willReturn('/admin/test');
-
-        // 在集成测试中，我们应该从容器获取服务而不是直接实例化
-        // 但我们需要先注入mock到容器，然后获取服务
-        self::getContainer()->set(LinkGeneratorInterface::class, $this->linkGenerator);
         $this->adminMenu = self::getService(AdminMenu::class);
-        $this->menuItem = $this->createMock(ItemInterface::class);
-    }
-
-    public function testInvokeCreatesMainMenu(): void
-    {
-        $childItem = $this->createMock(ItemInterface::class);
-
-        $this->menuItem->expects($this->exactly(2))
-            ->method('getChild')
-            ->with('微信小程序跟踪')
-            ->willReturnOnConsecutiveCalls(null, $childItem)
-        ;
-
-        $this->menuItem->expects($this->once())
-            ->method('addChild')
-            ->with('微信小程序跟踪')
-            ->willReturn($childItem)
-        ;
-
-        $this->adminMenu->__invoke($this->menuItem);
-    }
-
-    public function testInvokeDoesNotCreateMainMenuWhenExists(): void
-    {
-        $childItem = $this->createMock(ItemInterface::class);
-
-        $this->menuItem->expects($this->atLeastOnce())
-            ->method('getChild')
-            ->with('微信小程序跟踪')
-            ->willReturn($childItem)
-        ;
-
-        $this->menuItem->expects($this->never())
-            ->method('addChild')
-            ->with('微信小程序跟踪')
-        ;
-
-        $this->adminMenu->__invoke($this->menuItem);
     }
 
     public function testServiceCanBeInstantiated(): void
@@ -79,25 +29,98 @@ class AdminMenuTest extends AbstractEasyAdminMenuTestCase
         $this->assertInstanceOf(AdminMenu::class, $this->adminMenu);
     }
 
-    public function testInvokeHandlesNullTrackingMenu(): void
+    public function testInvokeCreatesMainMenu(): void
     {
-        $this->menuItem->expects($this->exactly(2))
-            ->method('getChild')
-            ->with('微信小程序跟踪')
-            ->willReturnOnConsecutiveCalls(null, null)
-        ;
+        $factory = new MenuFactory();
+        $rootItem = $factory->createItem('root');
 
-        $childItem = $this->createMock(ItemInterface::class);
-        $this->menuItem->expects($this->once())
-            ->method('addChild')
-            ->with('微信小程序跟踪')
-            ->willReturn($childItem)
-        ;
+        // 第一次调用应该创建菜单
+        $this->adminMenu->__invoke($rootItem);
 
-        // 验证方法执行不抛出异常
-        $this->adminMenu->__invoke($this->menuItem);
+        $this->assertNotNull($rootItem->getChild('微信小程序跟踪'));
+    }
 
-        // 使用具体断言来验证结果
-        $this->assertInstanceOf(AdminMenu::class, $this->adminMenu);
+    public function testInvokeCreatesSubMenuItems(): void
+    {
+        $factory = new MenuFactory();
+        $rootItem = $factory->createItem('root');
+
+        $this->adminMenu->__invoke($rootItem);
+
+        $trackingMenu = $rootItem->getChild('微信小程序跟踪');
+        $this->assertNotNull($trackingMenu);
+
+        // 验证子菜单项
+        $this->assertNotNull($trackingMenu->getChild('页面访问日志'));
+        $this->assertNotNull($trackingMenu->getChild('跳转tracking日志'));
+        $this->assertNotNull($trackingMenu->getChild('404页面日志'));
+    }
+
+    public function testInvokeDoesNotDuplicateMainMenu(): void
+    {
+        $factory = new MenuFactory();
+        $rootItem = $factory->createItem('root');
+
+        // 预先创建菜单
+        $rootItem->addChild('微信小程序跟踪');
+
+        // 调用应该不会创建重复的主菜单
+        $this->adminMenu->__invoke($rootItem);
+
+        // 只有一个同名菜单
+        $children = array_filter(
+            $rootItem->getChildren(),
+            fn ($child) => $child->getName() === '微信小程序跟踪'
+        );
+        $this->assertCount(1, $children);
+    }
+
+    public function testMenuItemsHaveIcons(): void
+    {
+        $factory = new MenuFactory();
+        $rootItem = $factory->createItem('root');
+
+        $this->adminMenu->__invoke($rootItem);
+
+        $trackingMenu = $rootItem->getChild('微信小程序跟踪');
+        $this->assertNotNull($trackingMenu);
+        $this->assertNotEmpty($trackingMenu->getAttribute('icon'));
+
+        // 验证子菜单项的图标
+        $pageVisitLog = $trackingMenu->getChild('页面访问日志');
+        $this->assertNotNull($pageVisitLog);
+        $this->assertNotEmpty($pageVisitLog->getAttribute('icon'));
+
+        $jumpTrackingLog = $trackingMenu->getChild('跳转tracking日志');
+        $this->assertNotNull($jumpTrackingLog);
+        $this->assertNotEmpty($jumpTrackingLog->getAttribute('icon'));
+
+        $pageNotFoundLog = $trackingMenu->getChild('404页面日志');
+        $this->assertNotNull($pageNotFoundLog);
+        $this->assertNotEmpty($pageNotFoundLog->getAttribute('icon'));
+    }
+
+    public function testMenuItemsHaveUris(): void
+    {
+        $factory = new MenuFactory();
+        $rootItem = $factory->createItem('root');
+
+        $this->adminMenu->__invoke($rootItem);
+
+        $trackingMenu = $rootItem->getChild('微信小程序跟踪');
+        $this->assertNotNull($trackingMenu);
+
+        // 验证子菜单项有 URI
+        $pageVisitLog = $trackingMenu->getChild('页面访问日志');
+        $this->assertNotNull($pageVisitLog);
+        $this->assertNotNull($pageVisitLog->getUri());
+
+        $jumpTrackingLog = $trackingMenu->getChild('跳转tracking日志');
+        $this->assertNotNull($jumpTrackingLog);
+        $this->assertNotNull($jumpTrackingLog->getUri());
+
+        $pageNotFoundLog = $trackingMenu->getChild('404页面日志');
+        $this->assertNotNull($pageNotFoundLog);
+        $this->assertNotNull($pageNotFoundLog->getUri());
     }
 }

@@ -18,7 +18,7 @@
     "symfony/dependency-injection": "^7.3",
     "symfony/doctrine-bridge": "^7.3",
     "symfony/event-dispatcher": "^7.3",
-    "symfony/http-foundation": "^7.3",
+    "symfony/http-foundation": "^7.4",
     "symfony/http-kernel": "^7.3",
     "symfony/property-access": "^7.3",
     "symfony/security-bundle": "^7.3",
@@ -32,7 +32,7 @@
     "tourze/doctrine-timestamp-bundle": "1.1.*",
     "tourze/doctrine-user-agent-bundle": "1.0.*",
     "tourze/doctrine-user-bundle": "1.0.*",
-    "tourze/json-rpc-core": "1.0.*",
+    "tourze/json-rpc-core": "2.0.*",
     "tourze/json-rpc-lock-bundle": "1.0.*",
     "tourze/json-rpc-log-bundle": "1.0.*",
     "tourze/json-rpc-security-bundle": "1.0.*",
@@ -48,12 +48,13 @@
     "knplabs/knp-menu": "^3.7",
     "phpstan/phpstan": "^2.1",
     "phpunit/phpunit": "^11.5",
-    "symfony/framework-bundle": "^7.3",
+    "symfony/framework-bundle": "^7.4",
     "tourze/easy-admin-menu-bundle": "1.0.*",
     "tourze/phpunit-doctrine-entity": "1.*",
-    "tourze/phpunit-symfony-kernel-test": "1.0.*",
-    "tourze/phpunit-symfony-unit-test": "1.*",
-    "tourze/phpunit-symfony-web-test": "1.*"
+    "tourze/phpunit-json-rpc": "1.0.*",
+    "tourze/phpunit-symfony-kernel-test": "2.0.*",
+    "tourze/phpunit-symfony-unit-test": "2.0.*",
+    "tourze/phpunit-symfony-web-test": "2.0.*"
   },
   "autoload": {
     "psr-4": {

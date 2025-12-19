@@ -359,30 +359,61 @@ final class PageVisitLogRepositoryIntegrationTest extends AbstractRepositoryTest
 
     /**
      * 根据数据创建实体
+     *
+     * @param array<string, mixed> $data
      */
     private function createEntityFromData(array $data): PageVisitLog
     {
         $entity = new PageVisitLog();
 
         // 必需字段必须有值
-        $entity->setPage($data['page'] ?? 'pages/default/index');
-        $entity->setRouteId($data['routeId'] ?? 1);
-        $entity->setSessionId($data['sessionId'] ?? 'default-session');
+        if (array_key_exists('page', $data)) {
+            $this->assertTrue(isset($data['page']), 'page must be set when key exists');
+        }
+        if (array_key_exists('routeId', $data)) {
+            $this->assertTrue(isset($data['routeId']), 'routeId must be set when key exists');
+        }
+        if (array_key_exists('sessionId', $data)) {
+            $this->assertTrue(isset($data['sessionId']), 'sessionId must be set when key exists');
+        }
+
+        $page = $data['page'] ?? 'pages/default/index';
+        $routeId = $data['routeId'] ?? 1;
+        $sessionId = $data['sessionId'] ?? 'default-session';
+
+        $this->assertIsString($page, 'page must be string');
+        $this->assertIsInt($routeId, 'routeId must be int');
+        $this->assertIsString($sessionId, 'sessionId must be string');
+
+        $entity->setPage($page);
+        $entity->setRouteId($routeId);
+        $entity->setSessionId($sessionId);
 
         // 可选字段
         if (array_key_exists('createdBy', $data)) {
+            $this->assertTrue($data['createdBy'] === null || is_string($data['createdBy']), 'createdBy must be null or string');
             $entity->setCreatedBy($data['createdBy']);
         }
 
         if (array_key_exists('query', $data)) {
+            $this->assertTrue($data['query'] === null || is_array($data['query']), 'query must be null or array');
+            if ($data['query'] !== null) {
+                // 确保数组的所有键都是字符串类型
+                $data['query'] = array_combine(
+                    array_map('strval', array_keys($data['query'])),
+                    array_values($data['query'])
+                );
+            }
             $entity->setQuery($data['query']);
         }
 
         if (array_key_exists('createTime', $data)) {
+            $this->assertTrue($data['createTime'] === null || $data['createTime'] instanceof \DateTimeImmutable, 'createTime must be null or DateTimeImmutable');
             $entity->setCreateTime($data['createTime']);
         }
 
         if (array_key_exists('createdFromIp', $data)) {
+            $this->assertTrue($data['createdFromIp'] === null || is_string($data['createdFromIp']), 'createdFromIp must be null or string');
             $entity->setCreatedFromIp($data['createdFromIp']);
         }
 

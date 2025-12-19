@@ -23,15 +23,4 @@ final class WechatMiniProgramTrackingExtensionTest extends AbstractDependencyInj
         $this->assertDirectoryExists($configPath);
         $this->assertFileExists($configPath . DIRECTORY_SEPARATOR . 'services.yaml');
     }
-
-    /**
-     * 创建 WechatMiniProgramTrackingExtension 实例的工厂方法
-     *
-     * @phpstan-ignore-next-line 为了测试目的，允许在工厂方法中直接实例化扩展类
-     */
-    private function createExtension(): WechatMiniProgramTrackingExtension
-    {
-        /** @phpstan-ignore-next-line */
-        return new WechatMiniProgramTrackingExtension();
-    }
 }

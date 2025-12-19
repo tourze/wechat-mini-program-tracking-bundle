@@ -4,7 +4,8 @@ namespace WechatMiniProgramTrackingBundle\Tests\Procedure;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
-use Tourze\JsonRPC\Core\Tests\AbstractProcedureTestCase;
+use Tourze\PHPUnitJsonRPC\AbstractProcedureTestCase;
+use WechatMiniProgramTrackingBundle\Param\ApiReportWeappVisitPageParam;
 use WechatMiniProgramTrackingBundle\Procedure\ApiReportWeappVisitPage;
 
 /**
@@ -26,22 +27,34 @@ final class ApiReportWeappVisitPageTest extends AbstractProcedureTestCase
      */
     public function testExecuteReturnsSuccess(): void
     {
-        $result = $this->procedure->execute();
+        $param = new ApiReportWeappVisitPageParam(
+            path: '/pages/index',
+            query: ['id' => '123']
+        );
+
+        $result = $this->procedure->execute($param);
 
         $this->assertArrayHasKey('ok', $result);
         $this->assertEquals(1, $result['ok']);
     }
 
     /**
-     * 测试默认属性值
+     * 测试带完整参数的 execute
      */
-    public function testDefaultPropertyValues(): void
+    public function testExecuteWithFullParameters(): void
     {
-        $this->assertNull($this->procedure->path);
-        $this->assertNull($this->procedure->query);
-        $this->assertEquals([], $this->procedure->referrerInfo);
-        $this->assertEquals(0, $this->procedure->scene);
-        $this->assertEquals('', $this->procedure->shareTicket);
+        $param = new ApiReportWeappVisitPageParam(
+            path: '/pages/product',
+            query: ['id' => '456'],
+            referrerInfo: ['appId' => 'wx123'],
+            scene: 1001,
+            shareTicket: 'ticket123'
+        );
+
+        $result = $this->procedure->execute($param);
+
+        $this->assertArrayHasKey('ok', $result);
+        $this->assertEquals(1, $result['ok']);
     }
 
     /**
@@ -60,23 +73,5 @@ final class ApiReportWeappVisitPageTest extends AbstractProcedureTestCase
     {
         $desc = ApiReportWeappVisitPage::getDesc();
         $this->assertEquals('小程序启动访问上报接口', $desc);
-    }
-
-    /**
-     * 测试属性设置
-     */
-    public function testPropertySetters(): void
-    {
-        $this->procedure->path = '/pages/index';
-        $this->procedure->query = ['id' => 123];
-        $this->procedure->referrerInfo = ['appId' => 'wx123'];
-        $this->procedure->scene = 1001;
-        $this->procedure->shareTicket = 'ticket123';
-
-        $this->assertEquals('/pages/index', $this->procedure->path);
-        $this->assertEquals(['id' => 123], $this->procedure->query);
-        $this->assertEquals(['appId' => 'wx123'], $this->procedure->referrerInfo);
-        $this->assertEquals(1001, $this->procedure->scene);
-        $this->assertEquals('ticket123', $this->procedure->shareTicket);
     }
 }
