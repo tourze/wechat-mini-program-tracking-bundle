@@ -39,7 +39,7 @@
     "tourze/symfony-cron-job-bundle": "1.1.*",
     "tourze/symfony-dependency-service-loader": "1.0.*",
     "tourze/symfony-schedule-entity-clean-bundle": "1.1.*",
-    "tourze/wechat-mini-program-bundle": "1.0.*",
+    "tourze/wechat-mini-program-bundle": "2.0.*",
     "yiisoft/arrays": "^3",
     "yiisoft/json": "^1.0"
   },
